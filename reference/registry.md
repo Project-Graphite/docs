@@ -45,8 +45,7 @@ errors — VS Code `settings.json`:
 
 **`owner` and `authors` are different things.** `owner` is whose namespace the project is listed
 under; `authors` is who actually wrote it. A vendored or collaborative project can be owned by one
-person and credited to someone else entirely, which is how a vendored project stays attributed to
-its original author.
+person and credited to someone else entirely, so the original author keeps the credit.
 
 An author with a `people/` entry links to their page. Anyone else links to their GitHub profile.
 
