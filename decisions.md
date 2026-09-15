@@ -30,7 +30,7 @@ names against the filesystem.
 
 ## Subdomains for applications, paths for pages
 
-`atlas.project-graphite.com` runs the application. `project-graphite.com/amr/atlas` is the page
+`atlas.project-graphite.com` runs the application. `project-graphite.com/projects/atlas` is the page
 about it.
 
 Serving an application under a path means it has to be **built** knowing where it is mounted —
@@ -127,25 +127,27 @@ Astro shipped zero JavaScript, which is genuinely better for a content site. But
 repository that gets edited most often, and being fluent in it matters more than 70 KB. The
 conversion cost an hour at the start; it would have cost a great deal more later.
 
-The zero-JavaScript property was recovered anyway by prerendering.
+Prerendering recovered the important crawlability and deep-link properties. The hydrated React
+application still ships JavaScript, which is an accepted trade-off rather than a zero-JavaScript
+site.
 
 ## Tailwind with a single token set
 
 The palette is declared once in an `@theme` block, which generates both the CSS custom properties
 and the utilities. So `bg-paper`, `text-muted`, `stroke-line` and `fill-surface` all read the same
-tokens, and the SVG diagrams theme with the layout rather than alongside it.
+tokens, so every component reads the same palette.
 
 Light and dark swap by redefining those properties. There is not a single `dark:` prefix in the
 codebase.
 
-## The topology diagram is generated
+## Deployment topology must be generated
 
-Each project card draws its actual services, routes, ports and database, from the same registry
-entry that creates the deployment.
+> **Designed, not implemented.**
 
-A hand-drawn architecture diagram is out of date the week after it is drawn. This one cannot drift:
-change the deployment and the diagram changes with it. It is also the one thing on the site that
-nobody else can copy, because nobody else has the data.
+When deployment topology returns to project pages, it must be generated from the registry rather
+than drawn by hand. A hand-drawn architecture diagram drifts from reality; the registry already
+contains the services, routes, ports and database needed to render an accurate secondary
+architecture section. The current site deliberately does not claim that this component exists.
 
 ## Nothing is deleted, only marked
 

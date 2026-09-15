@@ -62,8 +62,10 @@ The first three steps are built and verified. The last is not; see
 
 `platform` holds two directories:
 
-- `people/<handle>.yml` — a person, and the namespace they own at `project-graphite.com/<handle>`
-- `projects/<slug>.yml` — a project: what it is, who owns it, how it is deployed
+- `people/<handle>.yml` — a person and their portfolio at
+  `project-graphite.com/members/<handle>`
+- `projects/<slug>.yml` — a project: what it is, who maintains it, who built it and how it is
+  deployed
 
 `tags/<slug>.json` records which image tag is currently deployed per service. **It is written by
 CI, never by hand.** Keeping it separate from the registry file means a bot deploy never conflicts

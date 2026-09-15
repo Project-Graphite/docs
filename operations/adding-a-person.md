@@ -28,7 +28,7 @@ They get **write on their own project only**. Read everywhere else.
 
 `platform/people/<handle>.yml` — see [../reference/registry.md](../reference/registry.md).
 
-The handle claims `project-graphite.com/<handle>` permanently, so agree it with them first.
+The handle claims `project-graphite.com/members/<handle>` permanently, so agree it with them first.
 
 ```sh
 cd platform
@@ -38,7 +38,8 @@ git add people/<handle>.yml
 git commit -m "feat: add <name>"
 ```
 
-On merge their page goes live, empty until they own a project.
+On merge their page goes live. It includes projects they maintain and projects that credit their
+GitHub username as an author.
 
 ## 5. Point them at the documentation
 
