@@ -32,7 +32,7 @@ errors — VS Code `settings.json`:
 | Field | Required | Notes |
 | :--- | :--- | :--- |
 | `slug` | yes | Lowercase, hyphenated. Must equal the filename and the repository name. |
-| `name` | yes | Display name, 2 to 60 characters. **Quote it if numeric** — `name: "2048"`. |
+| `name` | yes | Display name, 2 to 60 characters. **Quote it if numeric** — `name: "2024"`. |
 | `summary` | yes | 20 to 240 characters. One or two sentences, present tense. |
 | `tags` | no | Up to six lowercase technology tags. |
 | `repo` | yes | `project-graphite/<name>`. |

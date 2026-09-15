@@ -135,11 +135,11 @@ which makes it easy to ship without noticing.
 
 ## A YAML value becomes a number
 
-**Symptom.** Validation fails with `name: 2048 is not of type 'string'`.
+**Symptom.** Validation fails with `name: 2024 is not of type 'string'`.
 
-**Cause.** YAML parses a bare `2048` as an integer.
+**Cause.** YAML parses a bare `2024` as an integer.
 
-**Fix.** Quote it: `name: "2048"`. Applies to anything that looks numeric — versions, years, values
+**Fix.** Quote it: `name: "2024"`. Applies to anything that looks numeric — versions, years, values
 with leading zeros.
 
 ---
