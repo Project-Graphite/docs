@@ -1,6 +1,6 @@
 # Rotating the deploy app key
 
-The `graphite-deploy` GitHub App is what lets CI write to `platform` and `portfolio`. Its private
+The `graphite-deploy` GitHub App is what lets CI write to `platform` and `graphite-hub`. Its private
 key is the most sensitive credential in the organisation: it can commit to both.
 
 Rotate it if it leaks, if it appears in a log, or on a schedule you are comfortable with.
@@ -11,7 +11,7 @@ Rotate it if it leaks, if it appears in a log, or on a schedule you are comforta
 | :--- | :--- |
 | App ID | `4923055` |
 | Permissions | Contents: read and write. Metadata: read. |
-| Installed on | `platform` and `portfolio` only |
+| Installed on | `platform` and `graphite-hub` only |
 | Webhook | disabled |
 
 The App ID is not secret — it is public installation metadata. The private key is.
@@ -47,7 +47,7 @@ Read the key **from the file**. Pasting it into a terminal puts it in your shell
 mangling the newlines, which fails with an unhelpful error.
 
 **3. Verify before revoking.** Re-run the latest `platform` Main workflow and confirm it reaches
-`Portfolio updated.` Do not skip this — if the new key is wrong you want both still working.
+`Graphite Hub updated.` Do not skip this — if the new key is wrong you want both still working.
 
 **4. Delete the old key** on the same GitHub App page.
 
@@ -60,7 +60,7 @@ A ruleset on a repository the app writes to will reject its push with `GH013: Re
 violations found`. The app needs to be a bypass actor:
 
 ```sh
-gh api -X PUT repos/project-graphite/portfolio/rulesets/<id> --input ruleset.json
+gh api -X PUT repos/project-graphite/graphite-hub/rulesets/<id> --input ruleset.json
 ```
 
 with
@@ -80,7 +80,7 @@ looks like a permissions problem rather than a rule problem.
 
 1. Delete the key on the app page immediately. Every token minted from it stops working.
 2. Generate a new one and update all three locations.
-3. Check `platform` and `portfolio` commit history for anything the leak period allows.
+3. Check `platform` and `graphite-hub` commit history for anything the leak period allows.
 
 The blast radius is bounded: Contents write on two repositories, no access to secrets, no admin
 rights, no other repository.

@@ -17,13 +17,13 @@ route with no clicking. Pages is the free path with a manual step.
 ## Domain layout
 
 ```
-project-graphite.com          the portfolio            Cloudflare Pages
+project-graphite.com          Graphite Hub             Cloudflare Pages
 www.project-graphite.com      301 to the apex          Redirect Rule
 <slug>.project-graphite.com   a deployed project       Pages, or the host via tunnel
 project-graphite.com/projects/<slug>  project showcase page    Cloudflare Pages
 ```
 
-Person and project **pages** are routes on the portfolio, not deployments:
+Person and project **pages** are routes on Graphite Hub, not deployments:
 
 ```
 project-graphite.com/members/amr    a person and their credited projects
@@ -62,9 +62,9 @@ repository; it is scoped per repository, so an earlier grant does not cover a ne
 Then **Custom domains → Set up a custom domain** and enter the hostname from the registry entry.
 The DNS record is written for you because the zone is already in the account.
 
-## Legacy portfolio redirects
+## Legacy Graphite Hub redirects
 
-The portfolio build writes exact redirects for every former member and project URL to `_redirects`.
+The Graphite Hub build writes exact redirects for every former member and project URL to `_redirects`.
 They are generated from the registry, deployed with the site and require no dashboard rules.
 
 ## The shared host

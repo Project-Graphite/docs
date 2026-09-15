@@ -41,7 +41,7 @@ It also puts every project on one origin, sharing cookies, `localStorage` and se
 With several people contributing, one project could read another's stored data. Subdomains are
 separate origins and the browser enforces it.
 
-Paths as pages give the URL structure without any of that, because the page is data the portfolio
+Paths as pages give the URL structure without any of that, because the page is data Graphite Hub
 already has.
 
 ## Subdomains stay one level deep
@@ -60,7 +60,7 @@ blocks it so outside collaborators cannot indirectly read private workflow logs.
 Project repositories are public, so `actions` must be. It contains workflow definitions and no
 secrets, so there is nothing to protect.
 
-This was found the hard way: `portfolio` failed at startup with zero jobs and no error text, and
+This was found the hard way: `graphite-hub` failed at startup with zero jobs and no error text, and
 took four probe workflows to isolate.
 
 ## Project repositories are public, and members cannot create private ones
@@ -108,7 +108,7 @@ It also means a contributor writes about fifteen lines of YAML instead of learni
 `small` and `medium`, not free-form numbers. The host is shared, and one project should not be able
 to take it down. A preset is also a decision someone can make without knowing what the box has.
 
-## The portfolio is prerendered
+## Graphite Hub is prerendered
 
 Every route is written to a real HTML file at build time.
 
@@ -121,7 +121,7 @@ which is worse than a 404 in every way that matters.
 
 ## React rather than Astro
 
-The portfolio was built in Astro first and converted.
+Graphite Hub was built in Astro first and converted.
 
 Astro shipped zero JavaScript, which is genuinely better for a content site. But this is the
 repository that gets edited most often, and being fluent in it matters more than 70 KB. The

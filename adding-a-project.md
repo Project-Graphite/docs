@@ -326,7 +326,7 @@ uses, so the two cannot drift, and validation fails the pull request if they do.
 
 Full field reference: [reference/registry.md](reference/registry.md).
 
-On merge, `platform` CI validates the entry, compiles the registry and commits it to `portfolio`,
+On merge, `platform` CI validates the entry, compiles the registry and commits it to `graphite-hub`,
 which rebuilds. The card appears at `project-graphite.com` and the project page at
 `project-graphite.com/projects/atlas`.
 
