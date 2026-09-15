@@ -167,7 +167,7 @@ git show HEAD:path/to/script.sh | file -
 `404.html` in the build output. Search engines then index every garbage URL as a real page, and
 broken links never surface as broken.
 
-**Fix.** Ship a `404.html`. The portfolio has one in `site/public/`, so it lands in `dist/`.
+**Fix.** Ship a `404.html`. Graphite Hub has one in `site/public/`, so it lands in `dist/`.
 
 Verify with a request to a path that cannot exist; it should return 404, and the root should still
 return 200.
@@ -185,7 +185,7 @@ serves directory index files instead. They disagree, so local testing lies.
 cd dist && python -m http.server 4173
 ```
 
-The portfolio does not rely on SPA fallback at all. Every route is prerendered to a real file, so
+Graphite Hub does not rely on SPA fallback at all. Every route is prerendered to a real file, so
 deep links are real files and unknown paths genuinely miss.
 
 ---
@@ -195,7 +195,7 @@ deep links are real files and unknown paths genuinely miss.
 **Cause.** **Root directory** was not set. It is not part of any framework preset, and presets
 assume the repository root.
 
-**Fix.** Set it to the folder containing `package.json` — `site` for the portfolio. The build
+**Fix.** Set it to the folder containing `package.json` — `site` for Graphite Hub. The build
 output directory is relative to it, so it stays `dist`, not `site/dist`.
 
 ---
@@ -215,7 +215,7 @@ Also check you are in Account Home rather than the zone — Bulk Redirects are a
 
 **Cause.** A client-rendered SPA. Everything is in the JavaScript bundle.
 
-**Fix.** The portfolio prerenders every route at build time with `react-dom/server`. If this
+**Fix.** Graphite Hub prerenders every route at build time with `react-dom/server`. If this
 reappears, `scripts/prerender.mjs` did not run — check the build script still chains all three
 steps: client build, SSR build, prerender.
 

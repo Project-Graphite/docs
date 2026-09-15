@@ -5,7 +5,7 @@
 | Repository | Visibility | What it is |
 | :--- | :--- | :--- |
 | [`.github`](https://github.com/project-graphite/.github) | public | Organisation profile and the contributing guide |
-| [`portfolio`](https://github.com/project-graphite/portfolio) | public | The site at project-graphite.com |
+| [`graphite-hub`](https://github.com/project-graphite/graphite-hub) | private | The site at project-graphite.com |
 | [`actions`](https://github.com/project-graphite/actions) | public | Reusable CI workflows every repository calls |
 | [`platform`](https://github.com/project-graphite/platform) | private | The registry: people, projects, deployment topology |
 | [`project-template`](https://github.com/project-graphite/project-template) | private | The skeleton new projects start from |
@@ -25,7 +25,7 @@ edit platform/projects/<slug>.yml
 platform CI ── validate ──▶ compile registry.json
         │
         ▼
-graphite-deploy app commits to portfolio
+graphite-deploy app commits to graphite-hub
         │
         ▼
 Cloudflare Pages builds and prerenders every route

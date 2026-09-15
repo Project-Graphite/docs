@@ -88,7 +88,7 @@ help: it is already in the reflog, in forks and in anything that cloned it.
 
 Your own project repository is yours. Merge what you like there.
 
-`platform`, `actions` and `portfolio` need review from `@project-graphite/maintainers`, because a
+`platform`, `actions` and `graphite-hub` need review from `@project-graphite/maintainers`, because a
 change there affects everyone else. CODEOWNERS routes this automatically.
 
 ## What belongs where
@@ -98,7 +98,7 @@ change there affects everyone else. CODEOWNERS routes this automatically.
 | Project code | that project |
 | How every project is built or checked | `actions` |
 | What a project is, or how it is deployed | `platform` |
-| How the site looks | `portfolio` |
+| How the site looks | `graphite-hub` |
 | How the organisation works | `docs` |
 
 If you are editing a workflow inside a project repository, stop. It almost certainly belongs in

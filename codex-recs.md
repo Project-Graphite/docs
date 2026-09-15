@@ -16,8 +16,18 @@ organisation and the live site.
   for hashed assets.
 - GitHub profile enrichment is concurrent, time-bounded and falls back to cached data instead of
   taking the whole deployment down.
-- The portfolio documentation no longer promises a topology component that is not present.
-- The portfolio now has an MIT licence.
+- Graphite Hub documentation no longer promises a topology component that is not present.
+- Graphite Hub now has an MIT licence.
+- The main site repository is now the private `graphite-hub`; its GitHub Actions build,
+  Cloudflare Pages deployment and registry synchronization were all verified after the change.
+
+## Private repository governance
+
+The current GitHub plan does not support repository rulesets on private organisation repositories;
+the Rules API reports that a plan upgrade or public visibility is required. The repository can stay
+private and deploy normally, but "pull requests only" is now a team convention rather than an
+enforced control. Keep write access narrow and upgrade to a plan that supports rulesets for private
+repositories before relying on required reviews or protected-branch enforcement.
 
 ## Decisions still needed
 
@@ -58,7 +68,7 @@ Extend `deploy.kind` only when its adapter is implemented and tested:
 | `none` | no runtime | libraries, desktop tools and source-only work |
 
 Cloudflare recommends Workers Static Assets for new sites; Pages remains supported, so migrate the
-portfolio when deployment configuration is next touched rather than creating avoidable churn:
+Graphite Hub when deployment configuration is next touched rather than creating avoidable churn:
 https://developers.cloudflare.com/workers/best-practices/workers-best-practices/
 
 Cloudflare Containers are useful but are not a database host. Their filesystem is ephemeral, cold
@@ -109,7 +119,7 @@ Static and ordinary Worker projects can use provider preview URLs. Compose proje
 single-level hostname such as `pr-123--atlas.project-graphite.com`; deeper hostnames are not covered
 by ordinary wildcard TLS. Expire previews automatically.
 
-Expose deployment metadata—not privileged host data—to the portfolio compiler: deployed digest,
+Expose deployment metadata—not privileged host data—to the Graphite Hub compiler: deployed digest,
 deployment time, health state and last successful check. Never make a green badge from registry
 intent alone.
 
@@ -120,8 +130,6 @@ intent alone.
 - Add filters once the catalogue is large enough to need them.
 - Replace the personal Gmail organisation address with a role address on
   `project-graphite.com`.
-- Update the GitHub repository description for `portfolio`; it still advertises topology
-  diagrams that are not present.
 - Add `SECURITY.md`, issue forms and an optional Discussions area when outside contribution is
   invited.
 
@@ -130,7 +138,7 @@ intent alone.
 1. Confirm member profile consent and add showcase media.
 2. Provision and restore-test the Compose host.
 3. Promote images by digest and add automatic rollback.
-4. Add health/deployment metadata to the portfolio.
+4. Add health/deployment metadata to Graphite Hub.
 5. Introduce the `worker` and `static` deployment adapters.
 6. Add Cloudflare Containers only for projects whose workload benefits from scale-to-zero.
 7. Add a second host, tunnel replica or managed database when a project has a real uptime
