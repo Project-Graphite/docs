@@ -77,7 +77,8 @@ https://developers.cloudflare.com/containers/faq/
 
 ### 4. Provision the first general-purpose host
 
-Follow `operations/provisioning-the-host.md`, starting with one 8 GB Linux VM and Docker Compose.
+Follow `operations/provisioning-the-host.md`, starting with one 4 GB Linux VM and Docker Compose.
+Increase to 8 GB only when measured memory use or the number of deployed services requires it.
 Use a remotely managed Cloudflare Tunnel, Traefik, the trusted reconciler and separate networks per
 project. Keep all inbound firewall ports closed and put administrative endpoints behind Cloudflare
 Access.
