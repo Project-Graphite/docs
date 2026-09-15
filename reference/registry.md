@@ -2,7 +2,7 @@
 
 The registry lives in `platform` and is the single source of truth. Two directories:
 
-- `people/<handle>.yml` — a person and the namespace they own
+- `people/<handle>.yml` — a person and their member portfolio
 - `projects/<slug>.yml` — a project, what it is and how it is deployed
 
 Validate before opening a pull request:
@@ -36,17 +36,17 @@ errors — VS Code `settings.json`:
 | `summary` | yes | 20 to 240 characters. One or two sentences, present tense. |
 | `tags` | no | Up to six lowercase technology tags. |
 | `repo` | yes | `project-graphite/<name>`. |
-| `owner` | yes | Handle of the person whose namespace it lives under. Must exist in `people/`. |
+| `owner` | yes | Handle of the member responsible for maintaining it. Must exist in `people/`. |
 | `authors` | yes | GitHub usernames of whoever built it. |
 | `status` | yes | `live`, `wip`, `archived` or `source-only`. |
 | `featured` | no | Sorts the entry to the top of the index. |
 | `listed` | no | `false` hides it from the site. For platform pieces only. |
 | `deploy.kind` | yes | `compose`, `pages` or `none`. |
 
-**`owner` and `authors` are different things.** `owner` is whose namespace the project is listed
-under; `authors` is who actually wrote it. A vendored or collaborative project can be owned by one
-person and credited to someone else entirely — that is how `2048` is owned by `amr` and credited to
-`gabrielecirulli`.
+**`owner` and `authors` are different things.** `owner` is the member responsible for maintaining
+the project in Graphite; `authors` is who actually wrote it. A project appears on a member page when
+they maintain it or their GitHub username is in `authors`, so collaborative projects appear on every
+registered contributor's portfolio.
 
 An author with a `people/` entry links to their page. Anyone else links to their GitHub profile.
 
@@ -142,12 +142,12 @@ links:
 
 | Field | Required | Notes |
 | :--- | :--- | :--- |
-| `handle` | yes | Lowercase. Becomes `project-graphite.com/<handle>` and must match the filename. |
+| `handle` | yes | Lowercase. Becomes `project-graphite.com/members/<handle>` and must match the filename. |
 | `github` | yes | GitHub username. Links `authors` entries to this page. |
 | `name` | yes | Display name. |
 | `headline` | no | One line, shown under the name. |
 | `bio` | no | Up to 600 characters. |
-| `links` | no | Up to six labelled links, all `https://`. |
+| `links` | no | Up to six labelled links using `https://` or `mailto:`. |
 
 ---
 

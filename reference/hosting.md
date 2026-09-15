@@ -20,18 +20,18 @@ route with no clicking. Pages is the free path with a manual step.
 project-graphite.com          the portfolio            Cloudflare Pages
 www.project-graphite.com      301 to the apex          Redirect Rule
 <slug>.project-graphite.com   a deployed project       Pages, or the host via tunnel
-project-graphite.com/<slug>   301 to the subdomain     Bulk Redirect (vanity)
+project-graphite.com/projects/<slug>  project showcase page    Cloudflare Pages
 ```
 
 Person and project **pages** are routes on the portfolio, not deployments:
 
 ```
-project-graphite.com/amr          a person and everything they own
-project-graphite.com/amr/atlas    a project page: what it is, who built it, what is deployed
+project-graphite.com/members/amr    a person and their credited projects
+project-graphite.com/projects/atlas a project page: what it is, who built it, what is deployed
 ```
 
-The running application is always on its own subdomain. `/amr/atlas` is the page *about* Atlas and
-links to it.
+The running application is always on its own subdomain. `/projects/atlas` is the page *about*
+Atlas and links to it. Legacy `/<handle>` and `/<handle>/<slug>` links redirect permanently.
 
 ## Subdomains are one level deep, permanently
 
@@ -62,26 +62,10 @@ repository; it is scoped per repository, so an earlier grant does not cover a ne
 Then **Custom domains → Set up a custom domain** and enter the hostname from the registry entry.
 The DNS record is written for you because the zone is already in the account.
 
-## Vanity redirects
+## Legacy portfolio redirects
 
-`project-graphite.com/<slug>` redirecting to the subdomain is a **Bulk Redirect**, which is
-account-level, not zone-level. Find it under Account Home, not inside the domain.
-
-1. Create a redirect list, add an entry: source `project-graphite.com/atlas`, target
-   `https://atlas.project-graphite.com`, status 301, preserve query string, **subpath matching on**,
-   preserve path suffix on.
-2. Create a **Bulk Redirect Rule** pointing at the list. **The list alone does nothing** — the rule
-   is what activates it.
-
-Subpath matching is what makes `project-graphite.com/atlas/settings` carry through rather than 404.
-
-Free plan limits: 10 Single Redirect rules, but **10,000 Bulk Redirect entries**. Use Single
-Redirects for the www rule and Bulk Redirects for vanity paths.
-
-**Never use a wildcard for this.** A rule matching `project-graphite.com/*` also matches
-`/assets/index-abc123.js` and would redirect the portfolio to nowhere, stripping its own CSS and
-JavaScript. There is no way to express "one path segment, no dot" without regex, and regex in Rules
-is a Business plan feature.
+The portfolio build writes exact redirects for every former member and project URL to `_redirects`.
+They are generated from the registry, deployed with the site and require no dashboard rules.
 
 ## The shared host
 

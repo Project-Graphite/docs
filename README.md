@@ -15,6 +15,7 @@ deployment topology and the operational runbooks.
 | Understand hosting and subdomains | [reference/hosting.md](reference/hosting.md) |
 | Fix something that is broken | [troubleshooting.md](troubleshooting.md) |
 | Know why something was built this way | [decisions.md](decisions.md) |
+| See the remaining product and hosting recommendations | [codex-recs.md](codex-recs.md) |
 
 Runbooks live in [operations/](operations/).
 
@@ -39,4 +40,4 @@ A folder containing a `Dockerfile` is a deployable service. That single conventi
 build, the checks and the deployment, so adding a service means adding a folder.
 
 A project becomes real when it has an entry in the `platform` registry. That one file produces the
-card on the site, the project page, the hostname and the deployment.
+card on the site, the project page and, for deployable projects, the hostname and deployment.

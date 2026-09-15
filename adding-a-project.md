@@ -15,8 +15,8 @@ Answer these before writing anything. Each one becomes a line in the registry en
 
 | Question | Example | Becomes |
 | :--- | :--- | :--- |
-| What is the slug? | `atlas` | repository name, compose project, `/amr/atlas` |
-| Who owns it? | `amr` | the namespace it is listed under |
+| What is the slug? | `atlas` | repository name, compose project, `/projects/atlas` |
+| Who maintains it? | `amr` | the member responsible for its registry and deployment |
 | Who wrote it? | you, a friend, an outside author | the credit line on the card |
 | What are the services? | `frontend`, `server`, `worker` | one folder each, one container each |
 | Which answer on the web? | `frontend` at `/`, `server` at `/api` | Traefik routes |
@@ -328,7 +328,7 @@ Full field reference: [reference/registry.md](reference/registry.md).
 
 On merge, `platform` CI validates the entry, compiles the registry and commits it to `portfolio`,
 which rebuilds. The card appears at `project-graphite.com` and the project page at
-`project-graphite.com/amr/atlas`.
+`project-graphite.com/projects/atlas`.
 
 ---
 
@@ -404,4 +404,4 @@ repository. See [reference/hosting.md](reference/hosting.md).
 - [ ] PR title is `type(scope): summary`
 - [ ] Registry entry merged in `platform`
 - [ ] Secrets placed on the host, if any
-- [ ] Card on the site, project page at `/<owner>/<slug>`, live link works
+- [ ] Card on the site, project page at `/projects/<slug>`, live link works when status is `live`
