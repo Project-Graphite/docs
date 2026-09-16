@@ -1,7 +1,8 @@
 # Overview
 
 Graphite Hub publishes member portfolios and project case studies at `project-graphite.com`.
-Cloudflare Pages hosts the Hub. Deployable projects use a shared zonal GKE Standard cluster.
+Cloudflare Pages hosts the Hub. Deployable full-stack demonstrations use Docker Compose through
+Coolify on one OVH VPS.
 
 ```text
 member or project pull request
@@ -10,27 +11,27 @@ member or project pull request
 shared checks and image build ---> GHCR immutable image
         |                              |
         v                              v
-platform registry and image tags ---> generated Kubernetes resources
+platform registry and image tags     Coolify pulls image
         |                              |
         v                              v
-Graphite Hub registry sync       per-project namespace
+Graphite Hub registry sync       production Compose services
                                        |
-visitor -> Cloudflare Tunnel -> internal gateway -> project Service
+visitor -> Cloudflare -> Coolify proxy -> project web service
 ```
 
-Each Kubernetes project receives:
+Each Compose project provides:
 
-- its own namespace, service account, quota, and default resource limits
-- default-deny network policies with explicit DNS, internet, intra-project, and gateway access
-- a ConfigMap and a separately created Secret
-- Deployments and Services for application processes
-- optional namespace-local PostgreSQL and Redis StatefulSets with persistent volumes
-- an image-specific migration Job
+- a versioned production Compose file in its repository
+- prebuilt GHCR images, health checks, restart behavior, and explicit resource limits
+- named volumes for persistent state
+- secret values stored only in Coolify
+- one public domain attached only to its web service
 
-`graphite-system` holds Cloudflare Tunnel and the internal HTTP gateway. There is no public
-LoadBalancer or NodePort. One compromised project should not receive credentials or network access
-to another project.
+Coolify owns the reverse proxy, HTTPS, deployments, and service logs. Project containers share one
+Docker host, so this is operational separation for trusted projects rather than a security boundary
+for hostile workloads.
 
-The first `e2-small` node is deliberately a lab, not a high-availability production platform. It
-fits the system components and one modest full-stack project. More simultaneous projects require a
-cost and capacity decision; the namespace and registry structure does not need to change.
+The 4 GB VPS is deliberately a portfolio host, not a high-availability production platform. Static
+frontends remain on Cloudflare Pages, images build in GitHub Actions, and the VPS runs only dynamic
+services. Sustained swap, OOM events, or less than 10 GB free disk trigger a capacity review before
+another project is added.

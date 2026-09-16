@@ -1,18 +1,22 @@
 # Message Lab
 
-Run the constrained deployment stack on the disposable host:
+Validate the production Compose definition without exposing secret values:
 
 ```sh
-docker compose --env-file deploy.env -f compose.deploy.yaml -f compose.micro.yaml pull
-docker compose --env-file deploy.env -f compose.deploy.yaml -f compose.micro.yaml --profile tools run --rm migrate
-docker compose --env-file deploy.env -f compose.deploy.yaml -f compose.micro.yaml up -d web worker postgres redis
+SECRET_KEY=validation-only POSTGRES_PASSWORD=validation-only docker compose -f compose.production.yaml config --quiet
 ```
 
-Verify the services, application dependencies and current resource use:
+Run the repository's application tests through its toolchain:
 
 ```sh
-curl --fail http://127.0.0.1:8000/up
-curl --fail http://127.0.0.1:8000/up/databases
-docker compose --env-file deploy.env -f compose.deploy.yaml -f compose.micro.yaml ps
+./run test
+```
+
+Inspect a deployed Coolify host without changing it:
+
+```sh
+free -h
+df -h /
+docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Image}}'
 docker stats --no-stream
 ```

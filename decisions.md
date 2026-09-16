@@ -23,36 +23,35 @@ private because it contains deployment topology; it still contains no secrets.
 People edit `projects/<slug>.yml`; automation edits `tags/<slug>.json`. A deploy cannot conflict with
 a person editing project metadata, and tag history remains a readable rollout record.
 
-## Kubernetes deployment is registry-generated
+## Production Compose stays with each project
 
-Contributors maintain Docker Compose only for local development. The platform registry generates
-production Deployments, Services, StatefulSets, Jobs, policies, quotas, and routing. This keeps one
-reviewable security and resource model across every project and prevents application repositories
-from introducing privileged production settings.
+Each application owns a versioned `compose.production.yaml`. It pulls images built by GitHub
+Actions, declares persistent storage and health checks, and caps CPU and memory. The private
+platform registry records the Compose source, hostname, public service, port, and secret names.
 
-## One namespace per project
+## Coolify is the shared application control plane
 
-Namespace isolation is the smallest model that allows multiple projects on one low-cost cluster
-without mixing configuration, Secrets, service discovery, quotas, or ordinary network traffic. It
-is soft multi-tenancy for trusted members, not a boundary for hostile code.
+Coolify manages Git sources, deployments, HTTPS routing, environment values, health, and logs on
+one OVH VPS. Projects receive separate Compose networks and volumes, but still share a Docker daemon
+and kernel. Only trusted organisation projects belong on this host.
 
-## No public Kubernetes ingress service
+## Static work stays off the VPS
 
-Cloudflare Tunnel reaches an internal gateway Service. Projects use ClusterIP Services only. This
-avoids a billable cloud load balancer and leaves no application port open to the internet.
+Graphite Hub and static project frontends remain on Cloudflare Pages. GitHub Actions builds dynamic
+service images. This reserves the 4 GB VPS for APIs, SSR processes, workers, PostgreSQL, and Valkey.
 
-## Fixed resource presets
+## Every long-running container has a resource ceiling
 
-`tiny`, `small`, and `medium` are easier to review than arbitrary numbers and prevent accidental
-resource claims from bypassing the starter cluster's constraints. Namespace quotas provide a
-second bound. Capacity changes remain explicit cost decisions.
+Production Compose files define CPU and memory limits. Limits prevent one idle demonstration from
+consuming the entire portfolio server; actual server memory, swap, disk, and OOM events remain the
+capacity signals.
 
 ## Deployment application remains manual initially
 
-CI publishes immutable images, records tags, validates the registry, and renders Kubernetes YAML.
-It does not hold cluster credentials or apply changes. Manual server-side dry run, review, and apply
-remain in place until rollback, restoration, secret rotation, and cost behavior are proven. A
-pull-based reconciler can automate this later with narrowly scoped permissions.
+CI publishes immutable images, records tags, and validates the registry. It does not hold VPS or
+Coolify credentials and does not deploy. Manual review and the Coolify Deploy action remain in
+place until rollback, restoration, secret rotation, and resource behavior are proven. A narrowly
+scoped deploy webhook can automate this later.
 
 ## Graphite Hub is prerendered
 

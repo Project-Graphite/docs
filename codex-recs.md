@@ -1,30 +1,25 @@
 # Project Graphite recommendations
 
-## Implemented in the GKE preparation
+## Implemented in the OVH and Coolify preparation
 
-- Replaced the production VM and Docker Compose design with registry-generated Kubernetes
-  resources. Local Compose remains available for contributors.
-- Added a namespace, restricted Pod Security labels, service account without token mounting,
-  ResourceQuota, LimitRange, and default-deny NetworkPolicy per project.
-- Added shared internal routing through Caddy and Cloudflare Tunnel without a public LoadBalancer or
-  NodePort.
-- Added immutable GHCR images, health probes, PostgreSQL and Redis StatefulSets, persistent volume
-  claims, and image-specific migration Jobs to the platform renderer.
-- Kept secret values outside Git and made their absence from generated resources explicit.
-- Added a user-run GKE procedure with an initial USD 25 monthly planning ceiling and reuse of the
-  existing VPC and subnet.
-- Updated shared workflows, the project template, and Graphite Message Lab so production deployment
-  has one contract.
+- Replaced the GKE-specific registry and renderer with a small Docker Compose contract for Coolify.
+- Added a production Message Lab stack that pulls prebuilt GHCR images, persists PostgreSQL and
+  Redis, runs migrations, checks health, and caps every service's CPU and memory.
+- Kept Graphite Hub and static projects on Cloudflare Pages to preserve VPS capacity.
+- Kept secret values outside Git and limited the private registry to their names.
+- Added a user-run OVH and Coolify procedure with checkout, security, DNS, deployment, backup,
+  rollback, and capacity gates.
+- Updated shared workflows and the project template so recording an image release never deploys or
+  receives VPS credentials.
 
 ## Next, after the first successful lab deployment
 
 1. Prove restoration before treating persistent projects as production. Schedule encrypted database
    exports to separately controlled object storage only after the storage cost and credentials are
    approved.
-2. Add pull-based reconciliation once manual render, dry run, apply, rollback, and secret rotation
-   have each been exercised. The reconciler should have namespace-scoped permissions and consume
-   reviewed platform commits.
-3. Add basic availability and certificate checks from outside the cluster. Alerting should avoid
+2. Add a narrowly scoped Coolify deploy webhook only after manual deployment, rollback, secret
+   rotation, backup, and restore have each been exercised.
+3. Add basic availability and certificate checks from outside the VPS. Alerting should avoid
    expensive log ingestion on the starter budget.
 4. Add a Hub deployment-status view sourced from non-sensitive platform metadata: immutable image
    tag, last successful rollout, health state, and project link.
@@ -33,17 +28,16 @@
 
 ## Capacity trigger
 
-Do not add nodes pre-emptively. Review capacity when requested CPU or memory no longer fits, eviction
-or OOM events appear, or a second full-stack project must remain online. At that point compare one
-larger node with a two-node pool and include the loss of the single-node GKE management-fee credit,
-disk, IPv4, and availability tradeoffs in the exact cost proposal.
+Do not resize the VPS pre-emptively. Review capacity when steady memory exceeds 75%, swap use grows,
+an OOM event occurs, free disk approaches 10 GB, or another full-stack project must remain online.
+Prepare the exact larger VPS, recurring price, tax, backup effect, and downtime before approval.
 
 ## Deliberately deferred
 
-- High availability, multi-zone nodes, Cloud NAT, a public ingress load balancer, and managed
-  PostgreSQL exceed the current lab goal or cost ceiling.
-- Service meshes, Helm operators, GitOps suites, and separate clusters per member are unnecessary at
-  this scale.
+- High availability, a second server, load balancer, and managed PostgreSQL exceed the current
+  portfolio goal or cost ceiling.
+- Kubernetes, service meshes, GitOps suites, and separate hosts per member are unnecessary at this
+  scale.
 - Preview environments for stateful projects should wait until cleanup automation and cost controls
   are proven.
-- Untrusted third-party workloads do not belong in this soft multi-tenant cluster.
+- Untrusted third-party workloads do not belong on this shared Docker host.

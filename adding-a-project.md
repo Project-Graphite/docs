@@ -13,8 +13,8 @@ my-project/
 └── compose.override.yaml
 ```
 
-Docker Compose is for local development. Production Kubernetes resources come from the platform
-registry, so projects do not carry privileged or divergent production manifests.
+`compose.yaml` and `compose.override.yaml` are for local development. `compose.production.yaml`
+defines the Coolify runtime and must pull prebuilt GHCR images rather than build on the VPS.
 
 ## 2. Make the application operable
 
@@ -27,48 +27,47 @@ than the container filesystem. Do not commit credentials or production connectio
 Add `projects/<slug>.yml` to the private `platform` repository. Declare:
 
 - the owner, authors, status, summary, and optional showcase
-- `deploy.kind: kubernetes`, `pages`, or `none`
-- hostname, services, paths, ports, sizes, commands, and health checks
-- non-secret config values and secret names
-- optional PostgreSQL, Redis, and migration requirements
+- `deploy.kind: compose`, `pages`, or `none`
+- hostname, production Compose file, public service, and internal port
+- secret names without their values
 
 Run:
 
 ```sh
 python scripts/validate.py
-python scripts/render_kubernetes.py .rendered
 ```
 
-Review the generated namespace bootstrap and workloads before merging.
+Review the registry output before merging.
 
 ## 4. Publish images
 
 The project workflow publishes
 `ghcr.io/project-graphite/<repository>/<service>:sha-<commit>` and records the immutable tag in
-`platform/tags/<slug>.json`. The deploy workflow does not have cluster credentials.
+`platform/tags/<slug>.json`. The release-record workflow does not have VPS or Coolify credentials.
 
-## 5. Prepare the namespace
+## 5. Prepare Coolify
 
-The rendered bootstrap creates the namespace, quota, service account, ConfigMap, and network
-policies. Create the declared Kubernetes Secret directly in that namespace. Never put its values in
-the registry, repository, command history, issue, or chat.
+Create a Git-based Docker Compose application in the `Graphite` Coolify project. Select the exact
+repository, `main` branch, and production Compose file declared in the registry. Enter secret values
+directly in Coolify. Never put them in the registry, repository, command history, issue, or chat.
 
-Applying resources is an external cluster write. Confirm the Kubernetes context, review the exact
-diff or server-side dry run, and receive specific approval before applying it.
+Selecting Deploy is an external VPS write. Review the parsed services, images, volumes, domains,
+health checks, resource limits, and current server capacity before receiving specific approval.
 
 ## 6. Expose and verify
 
-Add the project's public hostname to the existing Cloudflare Tunnel, pointing at the shared
-internal gateway. Verify health, persistence, background work, restart behavior, logs, and resource
+Add the project's public hostname in Cloudflare and attach it only to the public service in Coolify.
+Verify HTTPS, health, persistence, background work, restart behavior, logs, backups, and resource
 usage. Add the live link and concrete outcome to its Hub showcase.
 
 ## Checklist
 
 - [ ] local Compose environment starts cleanly
 - [ ] lint and tests pass
-- [ ] images run as non-root under restricted Pod Security
-- [ ] registry entry validates and generated YAML is reviewed
-- [ ] secret names are declared and values are stored only in Kubernetes
-- [ ] requests fit the current node and namespace quota
-- [ ] hostname route is configured in Cloudflare Tunnel
+- [ ] production Compose pulls prebuilt images and publishes no host ports
+- [ ] every long-running service has a health check where applicable and a resource limit
+- [ ] registry entry validates and matches the production Compose source
+- [ ] secret names are declared and values are stored only in Coolify
+- [ ] workloads fit the VPS without sustained swap or low disk
+- [ ] hostname is configured in Cloudflare and only the web service is public
 - [ ] persistence, worker processing, restart, and rollback are tested

@@ -5,24 +5,23 @@ fix. Most of them present with an error pointing somewhere other than the proble
 
 ---
 
-## A Pod stays Pending
+## A container is repeatedly restarting or reports OOMKilled
 
-Check `kubectl describe pod` and the namespace ResourceQuota. On the starter `e2-small`, the common
-cause is insufficient allocatable memory rather than a broken image. Do not resize or add a node
-without an exact cost review and approval. Stop an unused project or reduce a justified resource
-request in the platform registry.
+Inspect its Coolify logs and the read-only output of `docker stats --no-stream` and `free -h`.
+Stop an unused demonstration before considering a resize. Do not raise a service limit or resize
+the VPS without actual usage evidence, the exact recurring price, and approval.
 
-## A Pod reports ImagePullBackOff
+## A container reports an image pull error
 
-Confirm the generated image name and immutable tag exist in GHCR and that the package is publicly
-readable. If the package must remain private, create a namespace-scoped image pull Secret and add
-support for it to the shared renderer; do not place a GitHub token in a manifest.
+Confirm the image name and tag exist in GHCR and that the package is publicly readable. If a package
+must remain private, add a narrowly scoped registry credential in Coolify; do not put a GitHub token
+in a Compose file.
 
 ## A project is healthy internally but the hostname fails
 
-Verify the application Service and gateway route first, then the `cloudflared` Pod, then the public
-hostname in Cloudflare. Projects do not use public LoadBalancer or NodePort Services, so testing the
-node IP is not a valid routing check.
+Verify the container health check and Coolify service domain first, then the Coolify proxy, then the
+public hostname in Cloudflare. The domain value must include the service's internal port, such as
+`:8000`, when the application does not listen on port 80.
 
 ## A workflow run fails with no jobs and no log
 
