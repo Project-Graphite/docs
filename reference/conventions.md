@@ -78,8 +78,9 @@ The exception is anything load-bearing for a tool rather than a human: `# noqa`,
 
 Never in a repository. Not in code, config, commit messages, logs or a pull request description.
 
-The registry names the environment variables a service needs; the values live on the host or in
-GitHub secrets. Every push is scanned over full history, and a committed secret fails the build.
+The registry names the environment variables a service needs; runtime values live in namespace
+Kubernetes Secrets and build credentials live in GitHub secrets. Every push is scanned over full
+history, and a committed secret fails the build.
 
 If you commit one by accident, rotate it first and rewrite history second. Rewriting alone does not
 help: it is already in the reflog, in forks and in anything that cloned it.

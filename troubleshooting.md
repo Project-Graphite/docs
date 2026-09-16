@@ -5,6 +5,25 @@ fix. Most of them present with an error pointing somewhere other than the proble
 
 ---
 
+## A Pod stays Pending
+
+Check `kubectl describe pod` and the namespace ResourceQuota. On the starter `e2-small`, the common
+cause is insufficient allocatable memory rather than a broken image. Do not resize or add a node
+without an exact cost review and approval. Stop an unused project or reduce a justified resource
+request in the platform registry.
+
+## A Pod reports ImagePullBackOff
+
+Confirm the generated image name and immutable tag exist in GHCR and that the package is publicly
+readable. If the package must remain private, create a namespace-scoped image pull Secret and add
+support for it to the shared renderer; do not place a GitHub token in a manifest.
+
+## A project is healthy internally but the hostname fails
+
+Verify the application Service and gateway route first, then the `cloudflared` Pod, then the public
+hostname in Cloudflare. Projects do not use public LoadBalancer or NodePort Services, so testing the
+node IP is not a valid routing check.
+
 ## A workflow run fails with no jobs and no log
 
 **Symptom.** The run is marked failed. Job count is zero. There is no annotation, no log to

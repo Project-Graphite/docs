@@ -1,57 +1,31 @@
 # Retiring a project
 
-Nothing gets deleted. A project that is no longer maintained is marked, not removed — a visible
-progression over time is worth more than a curated handful, and a dead link discovered later is
-worse than an honest label.
+Retirement has a reversible registry phase and a destructive runtime phase. Do not combine them.
 
-## 1. Change the status
+## Hide and stop future deployment records
 
-`platform/projects/<slug>.yml`:
+Change the platform entry to:
 
 ```yaml
 status: archived
-```
-
-The card keeps its place with a grey dot reading "archived", and **the live link disappears** —
-only `live` produces one. That alone prevents the most common rot, which is a card advertising a
-URL that stopped resolving months ago.
-
-## 2. Stop the deployment
-
-```yaml
 deploy:
   kind: none
 ```
 
-Remove the `host`, `services` and `database` keys; `kind: none` accepts nothing else.
+Keep the repository, authors, showcase, and tag history. Validate and merge this change first.
 
-On merge, the compose project is removed from the host on the next reconcile and its resources come
-back. For a `kind: pages` project, delete the Pages project in Cloudflare separately — the registry
-does not manage it.
+## Preserve state
 
-## 3. Clean up what the registry no longer covers
+Before any cluster deletion, identify persistent volume claims, create and verify a database export,
+record the deployed image tags, and decide the retention period. A backup that has not been restored
+in a test is not verified.
 
-- delete the DNS record if one was created by hand
-- remove the vanity Bulk Redirect entry
-- remove the project secrets file from the host
-- archive the repository on GitHub: Settings → Archive this repository
+## Remove runtime resources
 
-Archiving makes it read-only and greys it in listings, while keeping the code and history readable.
+Namespace deletion removes workloads, Secrets, and persistent volume claims and may delete the
+underlying disks. Cloudflare hostname and tunnel changes are separate external mutations. Prepare
+the exact commands, inspect the current Kubernetes context and resources, and obtain specific
+approval for each destructive step.
 
-## 4. Leave the database alone until you are sure
-
-Dropping a database is not reversible. Take a dump first, keep it somewhere off the host, and drop
-it later if you still want to.
-
-```sh
-ssh graphite
-docker compose -p _data exec -T db pg_dump -U postgres <slug> | gzip > ~/<slug>-final.sql.gz
-```
-
-## If the project should disappear entirely
-
-Set `listed: false` rather than deleting the entry. The registry keeps the record, the site stops
-showing it, and the hostname stays claimed so nobody reuses it by accident.
-
-Deleting the file is also fine, but then nothing stops a future project taking the same slug and
-inheriting stale links.
+Do not reuse a retired hostname immediately. Keeping the archived registry entry prevents accidental
+reassignment and preserves the Hub history.

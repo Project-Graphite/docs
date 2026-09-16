@@ -1,87 +1,41 @@
 # Hosting
 
-## Two paths
-
-| | `kind: pages` | `kind: compose` |
+| Deployment kind | Runtime | Intended use |
 | :--- | :--- | :--- |
-| Runs on | Cloudflare Pages | the shared host |
-| Cost | free | shared box |
-| Suits | static sites, SPAs | anything with a backend |
-| Preview per PR | yes, free | not yet |
-| Setup per project | **one manual Cloudflare step** | fully automatic |
-| Status | **built and verified** | **designed, not provisioned** |
+| `pages` | Cloudflare Pages | Hub and static sites |
+| `kubernetes` | shared GKE cluster | APIs, databases, queues, and workers |
+| `none` | no runtime | libraries, archived work, and source-only projects |
 
-The automated path is the container one: merging a registry entry creates the DNS record and the
-route with no clicking. Pages is the free path with a manual step.
+## Hostnames
 
-## Domain layout
-
-```
-project-graphite.com          Graphite Hub             Cloudflare Pages
-www.project-graphite.com      301 to the apex          Redirect Rule
-<slug>.project-graphite.com   a deployed project       Pages, or the host via tunnel
-project-graphite.com/projects/<slug>  project showcase page    Cloudflare Pages
+```text
+project-graphite.com                 Graphite Hub
+<slug>.project-graphite.com          deployed project
+project-graphite.com/members/<name>  member portfolio
+project-graphite.com/projects/<slug> project case study
 ```
 
-Person and project **pages** are routes on Graphite Hub, not deployments:
+Cloudflare Pages owns the Hub hostname. Kubernetes hostnames point at a remotely managed Cloudflare
+Tunnel. The tunnel connects to `graphite-gateway.graphite-system.svc.cluster.local:8080`, and the
+gateway maps each hostname and path to a ClusterIP Service.
 
-```
-project-graphite.com/members/amr    a person and their credited projects
-project-graphite.com/projects/atlas a project page: what it is, who built it, what is deployed
-```
+## Isolation
 
-The running application is always on its own subdomain. `/projects/atlas` is the page *about*
-Atlas and links to it. Legacy `/<handle>` and `/<handle>/<slug>` links redirect permanently.
+The cluster is shared but projects are not placed in one trust boundary. Each project has a
+namespace, quota, non-privileged service account, restricted Pod Security labels, and default-deny
+NetworkPolicy. Workload service-account tokens are not mounted. Applications receive only declared
+configuration and secret keys.
 
-## Subdomains are one level deep, permanently
+The design is soft multi-tenancy suitable for trusted organisation members. It is not a sandbox for
+hostile workloads. Projects that require strong tenant isolation should use a separate cluster or
+runtime.
 
-Cloudflare Universal SSL on the free plan covers the apex and **first-level subdomains only**.
-`atlas.amr.project-graphite.com` would have no valid certificate. Deeper levels need Advanced
-Certificate Manager, which is paid.
+## Capacity
 
-So subdomains stay flat. If two people ever want the same slug, namespace the slug itself —
-`amr-atlas.project-graphite.com` — not the domain.
+The initial single `e2-small` node can host one modest full-stack project plus system pods. It is a
+cost-bounded deployment test. Adding an always-on database-heavy project requires reviewing node
+allocatable memory, namespace requests, persistent disks, projected monthly cost, and failure
+impact before changing capacity.
 
-## Cloudflare Pages setup
-
-Once per `kind: pages` project.
-
-**Workers and Pages → Create → Pages → Connect to Git.** Grant the Cloudflare app access to the
-repository; it is scoped per repository, so an earlier grant does not cover a new one.
-
-| Field | Value |
-| :--- | :--- |
-| Framework preset | React (Vite), or None for a site with no build |
-| Root directory | the `source.directory` from the registry entry |
-| Build command | the `source.command`, or empty |
-| Build output directory | the `source.output`, relative to the root directory |
-| `NODE_VERSION` | `22` |
-
-**Root directory is not part of any preset** and is the field that breaks the build when missed.
-
-Then **Custom domains → Set up a custom domain** and enter the hostname from the registry entry.
-The DNS record is written for you because the zone is already in the account.
-
-## Legacy Graphite Hub redirects
-
-The Graphite Hub build writes exact redirects for every former member and project URL to `_redirects`.
-They are generated from the registry, deployed with the site and require no dashboard rules.
-
-## The shared host
-
-> **Designed, not provisioned.**
-
-```
-cloudflared ──▶ traefik ──▶ project containers
-```
-
-Three pieces of infrastructure, then projects. `cloudflared` dials out to Cloudflare, so the box has
-no inbound ports open, no exposed IP, and no certificates to renew — Cloudflare terminates TLS and
-Traefik speaks plain HTTP internally. Traefik routes by `Host` header, which is why one rule covers
-every project and why adding a project needs no infrastructure change.
-
-Details and the provisioning runbook: [../operations/provisioning-the-host.md](../operations/provisioning-the-host.md).
-
-The disposable Google Cloud deployment test is narrower than the shared-host design. Follow
-[../operations/google-cloud-message-lab.md](../operations/google-cloud-message-lab.md) for its exact
-manual checklist; no part of that runbook is automated against the Google Cloud account.
+See [../operations/google-cloud-gke.md](../operations/google-cloud-gke.md) for the exact user-run
+cluster procedure and cost boundary.
