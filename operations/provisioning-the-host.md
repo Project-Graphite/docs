@@ -1,7 +1,8 @@
 # Provisioning the host
 
-> **Designed, not provisioned.** Nothing below exists yet. The design is settled and the shape is
-> accurate, but this is a plan, not a runbook you can follow today.
+> **Designed, not provisioned.** The production platform below does not exist yet. The disposable
+> Message Lab has a separate, intentionally smaller manual runbook in
+> [google-cloud-message-lab.md](google-cloud-message-lab.md).
 
 Until a host exists, `kind: compose` projects build and push images and record their tags
 correctly, and nothing serves their hostname. Only `kind: pages` projects are actually live.
@@ -29,14 +30,17 @@ entirely.
 Traefik routes by `Host` header, which is why one configuration covers every project and adding a
 project needs no infrastructure change.
 
-## The box
+## Production sizing
 
 | Option | Cost | Notes |
 | :--- | :--- | :--- |
 | Hetzner CX22 | about 4 EUR/month | 2 vCPU, 4 GB, 40 GB, x86. Predictable. |
 | Oracle Always Free | free | 4 ARM cores, 24 GB. Capacity is often unavailable; ARM means multi-architecture image builds. |
 
-Start with Hetzner unless the 4 EUR matters. The ARM tax on Python images under QEMU is real.
+This table predates the Google Cloud experiment and remains a production comparison, not an active
+purchase recommendation. The Message Lab uses an `e2-micro` only to prove the workflow. Use at least
+4 GB for a persistent multi-project host and make a fresh provider and price comparison before
+buying it.
 
 The box is disposable by design: everything is in git and in container images, so rebuilding it is
 a script, not an archaeology exercise. That is what makes a cheap or flaky host acceptable.

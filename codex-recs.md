@@ -3,6 +3,40 @@
 Reviewed 2026-09-15 against the local Project Graphite repositories, the public GitHub
 organisation and the live site.
 
+## Changes completed 2026-09-16
+
+- Added an optional, validated showcase contract with a problem, approach, outcome and
+  member-specific contribution summaries.
+- Made Windhawk Mods featured and added its first case study. Member project cards now explain the
+  member's contribution when that information exists.
+- Added Hub navigation, a skip link, visible keyboard focus, reduced-motion behavior and a
+  system/light/dark theme control that remembers the visitor's choice.
+- Aligned canonical URLs, sitemap entries and redirects on trailing-slash routes, and improved
+  social metadata.
+- Limited GitHub Actions permissions to read-only repository content where workflows need no write
+  access.
+- Added a bounded `e2-micro` Compose profile for Graphite Message Lab: one web process, one worker
+  process, memory/CPU/PID limits, bounded logs and smaller PostgreSQL/Redis settings.
+- Added the manual Google Cloud checklist in
+  [operations/google-cloud-message-lab.md](operations/google-cloud-message-lab.md). No Google Cloud
+  resources were created or changed.
+- Added a Codex-native `AGENTS.md` to the private `dotclaude` repository and its sync map, and
+  installed the same file as the global Codex instructions.
+- Corrected the service packaging decision: services are registry-declared and may share an image;
+  separate top-level service folders are not mandatory.
+
+## Remaining recommendations after this pass
+
+- Ask each member to approve their profile and contribution text before expanding the public
+  catalogue.
+- Add a real screenshot or short demo to Windhawk Mods; the schema intentionally does not invent a
+  media contract before an asset exists.
+- Keep Graphite Message Lab unlisted until its manual deployment succeeds end to end.
+- Treat the `e2-micro` configuration as a functional lab only. Use at least 4 GB and revisit data,
+  backup, monitoring and availability decisions before hosting persistent member projects.
+- Add structured data and project-specific social images after the core content and real media are
+  settled.
+
 ## Changes completed in this review
 
 - Member and project pages now have stable canonical routes:
@@ -39,21 +73,18 @@ their preferred handle, name, headline, biography, links and technologies. The i
 automatically publish every organisation member; GitHub membership can be private and membership
 alone is not consent to publish a portfolio.
 
-### 2. Define the showcase content contract
+### 2. Extend the showcase contract only when real media exists
 
-Add optional fields for:
+The first structured contract is now implemented. Add optional fields later for:
 
 - hero screenshot or short demo;
-- problem, solution and measurable result;
-- each member's roles or contributions;
 - repository, live URL and documentation URL;
 - long-form Markdown or MDX case study;
 - project-specific social image.
 
-The project page should lead with outcome and contribution. Deployment topology belongs in a
-secondary architecture section. Until this contract exists, make the public acceptance criteria
-match reality: source-only projects do not need a live link, but every listed project should have
-a useful README and media when media is meaningful.
+The project page now leads with outcome and contribution. Deployment topology belongs in a
+secondary architecture section. Source-only projects do not need a live link, but every listed
+project should have a useful README and media when media is meaningful.
 
 ### 3. Add deployment targets instead of one universal runtime
 

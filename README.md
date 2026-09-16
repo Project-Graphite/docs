@@ -13,6 +13,7 @@ deployment topology and the operational runbooks.
 | Know what CI runs and when | [reference/workflows.md](reference/workflows.md) |
 | Name something correctly | [reference/conventions.md](reference/conventions.md) |
 | Understand hosting and subdomains | [reference/hosting.md](reference/hosting.md) |
+| Run the disposable Google Cloud test | [operations/google-cloud-message-lab.md](operations/google-cloud-message-lab.md) |
 | Fix something that is broken | [troubleshooting.md](troubleshooting.md) |
 | Know why something was built this way | [decisions.md](decisions.md) |
 | See the remaining product and hosting recommendations | [codex-recs.md](codex-recs.md) |
@@ -33,11 +34,11 @@ If a page carries no marker, it is built and verified.
 
 ## The short version
 
-One repository per project. Every part of a project — front end, API, workers — lives in that one
-repository in separate top-level folders, not spread across several repositories.
+One repository per project. Every part of a project — front end, API and workers — lives in that one
+repository, not spread across several repositories.
 
-A folder containing a `Dockerfile` is a deployable service. That single convention drives the
-build, the checks and the deployment, so adding a service means adding a folder.
+The platform registry names deployable services. Independent services can use separate Dockerfiles;
+services built from the same code can share one image and run different commands.
 
 A project becomes real when it has an entry in the `platform` registry. That one file produces the
 card on the site, the project page and, for deployable projects, the hostname and deployment.

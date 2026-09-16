@@ -81,3 +81,7 @@ Traefik speaks plain HTTP internally. Traefik routes by `Host` header, which is 
 every project and why adding a project needs no infrastructure change.
 
 Details and the provisioning runbook: [../operations/provisioning-the-host.md](../operations/provisioning-the-host.md).
+
+The disposable Google Cloud deployment test is narrower than the shared-host design. Follow
+[../operations/google-cloud-message-lab.md](../operations/google-cloud-message-lab.md) for its exact
+manual checklist; no part of that runbook is automated against the Google Cloud account.

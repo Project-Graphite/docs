@@ -7,8 +7,9 @@ someone who assumed it was an accident.
 
 ## One repository per project, not per service
 
-A project with a front end, an API and a worker keeps all three in one repository, in separate
-top-level folders.
+A project with a front end, an API and a worker keeps all three in one repository. Services may use
+separate top-level folders, or share one application image when they are the same code with different
+runtime commands.
 
 Splitting a project across repositories means a change to a shared contract lands in two places at
 two times, and neither repository tells the whole story. One repository per project keeps the
@@ -17,16 +18,15 @@ history of a thing in one place, which is what makes it readable as a portfolio 
 The cost is that CI has to work out which parts changed. That is the detect step, and it is about
 thirty lines.
 
-## A folder with a Dockerfile is a service
+## The registry names deployable services
 
-Nothing declares the service list. CI derives it from the filesystem.
+The project registry is the deployment contract and names every deployable service. CI must publish
+an image package for each named service. Multiple service names may point to the same built image;
+Graphite Message Lab deliberately publishes one application image as both `web` and `worker`.
 
-The alternative — a config file listing services — drifts. Someone adds a folder and forgets the
-list, and the failure is a service that silently never deploys. Deriving it means the two cannot
-disagree, and adding a service is adding a folder.
-
-The registry does name services, but only to say how they are exposed, and validation checks those
-names against the filesystem.
+Validation should compare workflow outputs with registry service names so a declared service cannot
+silently go unpublished. Projects with independent codebases can still derive build targets from
+folders containing Dockerfiles.
 
 ## Subdomains for applications, paths for pages
 
