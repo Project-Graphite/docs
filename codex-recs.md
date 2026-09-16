@@ -11,8 +11,8 @@
 - Added immutable GHCR images, health probes, PostgreSQL and Redis StatefulSets, persistent volume
   claims, and image-specific migration Jobs to the platform renderer.
 - Kept secret values outside Git and made their absence from generated resources explicit.
-- Added a user-run GKE procedure with an initial USD 25 monthly planning ceiling and exact removal
-  steps for the abandoned VM path.
+- Added a user-run GKE procedure with an initial USD 25 monthly planning ceiling and reuse of the
+  existing VPC and subnet.
 - Updated shared workflows, the project template, and Graphite Message Lab so production deployment
   has one contract.
 
