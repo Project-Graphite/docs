@@ -11,20 +11,25 @@
   rollback, and capacity gates.
 - Updated shared workflows and the project template so recording an image release never deploys or
   receives VPS credentials.
+- Deployed Graphite Message Lab through prebuilt GHCR images and configured an authenticated,
+  deploy-only Coolify webhook after the test and image jobs.
+- Restricted public host access to SSH, HTTP, and HTTPS; removed direct Coolify dashboard and
+  real-time port exposure.
+- Enabled Coolify two-factor authentication, closed registration, scheduled instance backup,
+  scheduled updates, and non-destructive Docker cleanup.
 
 ## Next, after the first successful lab deployment
 
 1. Prove restoration before treating persistent projects as production. Schedule encrypted database
    exports to separately controlled object storage only after the storage cost and credentials are
    approved.
-2. Add a narrowly scoped Coolify deploy webhook only after manual deployment, rollback, secret
-   rotation, backup, and restore have each been exercised.
-3. Add basic availability and certificate checks from outside the VPS. Alerting should avoid
+2. Add basic availability and certificate checks from outside the VPS. Alerting should avoid
    expensive log ingestion on the starter budget.
-4. Add a Hub deployment-status view sourced from non-sensitive platform metadata: immutable image
+3. Add a Hub deployment-status view sourced from non-sensitive platform metadata: immutable image
    tag, last successful rollout, health state, and project link.
-5. Publish an owner-facing runbook for rollback, incident triage, backup restore, and spending
-   anomalies before onboarding member-owned stateful services.
+4. Exercise Message Lab rollback and restore, then record the measured recovery result.
+5. Publish an owner-facing incident-triage and spending-anomaly procedure before onboarding
+   member-owned stateful services.
 
 ## Capacity trigger
 

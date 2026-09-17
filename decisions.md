@@ -46,12 +46,13 @@ Production Compose files define CPU and memory limits. Limits prevent one idle d
 consuming the entire portfolio server; actual server memory, swap, disk, and OOM events remain the
 capacity signals.
 
-## Deployment application remains manual initially
+## Application deployment follows successful CI
 
-CI publishes immutable images, records tags, and validates the registry. It does not hold VPS or
-Coolify credentials and does not deploy. Manual review and the Coolify Deploy action remain in
-place until rollback, restoration, secret rotation, and resource behavior are proven. A narrowly
-scoped deploy webhook can automate this later.
+CI publishes immutable SHA images and moving `main` images only after tests pass. Each automated
+application uses a resource-specific Coolify webhook and a deploy-only API token stored as GitHub
+Actions secrets. Coolify's direct Auto Deploy remains disabled, preventing a repository event from
+racing the image build. Manual Deploy remains the path for first deployment, configuration changes,
+and rollback.
 
 ## Graphite Hub is prerendered
 

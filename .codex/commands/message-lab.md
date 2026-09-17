@@ -6,10 +6,17 @@ Validate the production Compose definition without exposing secret values:
 SECRET_KEY=validation-only POSTGRES_PASSWORD=validation-only docker compose -f compose.production.yaml config --quiet
 ```
 
-Run the repository's application tests through its toolchain:
+Run the complete repository CI path through its toolchain:
 
 ```sh
-./run test
+./run ci:test
+```
+
+Verify the public site and privacy-filtered API:
+
+```sh
+curl -I https://message-lab.project-graphite.com
+curl https://message-lab.project-graphite.com/api/messages/
 ```
 
 Inspect a deployed Coolify host without changing it:

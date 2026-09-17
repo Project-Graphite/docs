@@ -1,102 +1,105 @@
 # OVH VPS and Coolify runbook
 
-This is the user-run procedure for the first Project Graphite host. It prepares one low-cost,
-single-server environment for portfolio demonstrations. It is not highly available and does not
-provide Kubernetes isolation.
+This is the completed Project Graphite procedure from VPS purchase through automatic application
+redeployment. It is also the recovery and onboarding reference for the current host.
 
-No step in this runbook authorizes an automated agent to order resources, change billing, configure
-OVH, change Cloudflare, or deploy an application. Review each external write before performing it.
+The host is a small, single-server portfolio environment. It is not highly available, and every
+application shares one Docker host. Do not place untrusted workloads on it.
 
-## Target and cost boundary
+## Current deployment
 
-| Item | Target |
+| Item | Current value |
 | :--- | :--- |
 | Provider | OVHcloud |
-| Product | VPS-1 from the VPS 2027 range |
+| Product class | VPS-1 |
+| Approved recurring checkout price | USD 5.35 |
 | CPU | 2 vCores |
-| Memory | 4 GB |
-| Storage | 40 GB NVMe |
-| Operating system | Ubuntu 24.04 LTS |
-| Runtime | self-hosted Coolify and Docker Compose |
-| Published starting price | USD 4.54 per month |
-| Hard checkout rule | stop if the final recurring total exceeds USD 5 before an explicit review |
+| Memory | 4 GB advertised, approximately 3.7 GiB visible |
+| Storage | 40 GB advertised, approximately 38 GB root filesystem |
+| Operating system | Ubuntu 24.04.4 LTS |
+| Hostname | `vps-2283122d` |
+| Public IPv4 | `135.125.254.59` |
+| Emergency swap | 2 GiB |
+| Runtime | Docker Compose managed by self-hosted Coolify |
+| Coolify dashboard | `https://coolify.project-graphite.com` |
+| Test application | `https://message-lab.project-graphite.com` |
 
-OVH labels the price as starting at USD 4.54. Region, tax, currency, commitment, and optional items
-can change the checkout total. Do not assume the product page is the invoice.
+The accepted USD 5.35 checkout was a billing decision made by Amr. Before renewing, resizing, or
+adding an OVH option, verify the current invoice currency, tax, term, and renewal price. Never infer
+approval for a new charge from this historical purchase.
 
-## 1. Review the order without purchasing
+## 1. Buy the VPS
 
-1. Open the OVHcloud VPS page and select **VPS-1** in the **VPS 2027** range.
-2. On **Commitment period**, choose **No commitment** unless a different term and its complete
-   charge have been explicitly approved.
-3. On **Location**, choose an available standard European datacenter. Prefer France or Germany for
-   latency from Egypt. Avoid **Local Zone** for the first host because its storage and feature set
-   can differ.
-4. On **Operating system**, choose **Ubuntu 24.04**. Do not select Windows, Plesk, cPanel, or a
-   marketplace application.
-5. Keep the included local storage. Do not add disks, additional IP addresses, premium backup,
-   snapshots, licences, support plans, or managed databases.
-6. The summary must still show 2 vCores, 4 GB RAM, 40 GB NVMe, and the included one-day automatic
-   backup.
-7. Stop at the final order summary. Record the recurring price, tax, one-time charge, renewal term,
-   datacenter, and currency. Approve those exact values before selecting the purchase button.
+1. Open the OVHcloud VPS catalogue and select the 4 GB VPS-1 option.
+2. Choose Ubuntu 24.04 LTS.
+3. Keep the standard CPU, RAM, and local disk.
+4. Do not add another IP, control panel licence, managed database, extra disk, or paid backup unless
+   its exact recurring cost has been reviewed.
+5. Review the final order page instead of relying on the advertised starting price.
+6. Confirm the final recurring amount, tax, currency, term, location, and optional items.
+7. Purchase only after those exact values are accepted.
+8. Wait for OVH to finish provisioning before attempting SSH.
 
-## 2. Prepare SSH access
+The completed order was accepted at USD 5.35 for the 2-vCore, 4-GB, 40-GB configuration.
 
-Generate a dedicated key on Windows PowerShell if one does not already exist:
+## 2. Create and register the SSH key
 
-```powershell
+From Windows PowerShell, create a dedicated key:
+
+~~~powershell
 ssh-keygen -t ed25519 -a 100 -f "$env:USERPROFILE\.ssh\graphite-ovh" -C "graphite-ovh"
-Get-Content "$env:USERPROFILE\.ssh\graphite-ovh.pub"
-```
+~~~
 
-Protect the private key and its passphrase. Add only the `.pub` value when the OVH order or
-installation screen offers **SSH key**. Do not paste the private key into OVH, GitHub, Coolify, a
-repository, or chat.
+Confirm both files exist:
 
-After OVH reports the VPS as delivered, open **Bare Metal Cloud → Virtual private servers** and
-select it. Record its IPv4 address and confirm its operating system is Ubuntu 24.04.
+~~~powershell
+Test-Path "$env:USERPROFILE\.ssh\graphite-ovh"
+Test-Path "$env:USERPROFILE\.ssh\graphite-ovh.pub"
+ssh-keygen -lf "$env:USERPROFILE\.ssh\graphite-ovh.pub"
+~~~
 
-Connect from PowerShell using the username shown by OVH, normally `ubuntu`:
+Add only `graphite-ovh.pub` to OVH. Never upload or paste the private key. If the VPS was installed
+without the correct key, use OVH's reinstall or console recovery path to add the public key.
 
-```powershell
-ssh -i "$env:USERPROFILE\.ssh\graphite-ovh" ubuntu@VPS_IP
-```
+Connect with:
 
-At the first connection, compare the displayed host fingerprint with the value in the OVH Control
-Panel before accepting it.
+~~~powershell
+ssh -i "$env:USERPROFILE\.ssh\graphite-ovh" ubuntu@135.125.254.59
+~~~
 
-## 3. Verify the fresh server
+At the first connection, compare the host fingerprint with the value shown by OVH before accepting
+it. The prompt should become `ubuntu@vps-2283122d`.
 
-Run these read-only commands first:
+## 3. Verify and update Ubuntu
 
-```sh
+Run:
+
+~~~sh
 cat /etc/os-release
 nproc
 free -h
 df -h /
 id
-```
+~~~
 
-Expected results are Ubuntu 24.04 LTS, 2 processors, roughly 4 GB memory, roughly 40 GB root disk,
-and a login user with `sudo` access. Stop if any material value differs from the approved order.
+The completed host reported Ubuntu 24.04.4 LTS, 2 CPUs, approximately 3.7 GiB RAM, approximately
+38 GB storage, and the non-root `ubuntu` user.
 
-Install current security updates:
+Install updates and reboot:
 
-```sh
+~~~sh
 sudo apt update
 sudo apt full-upgrade
 sudo reboot
-```
+~~~
 
-Reconnect only after SSH starts accepting connections again.
+Reconnect with the same SSH command after the server returns.
 
 ## 4. Add emergency swap
 
-The server should not normally consume swap, but 2 GB reduces the chance that a temporary image
-pull or deployment kills the host:
+Create one 2-GiB swap file:
 
-```sh
+~~~sh
 sudo fallocate -l 2G /swapfile
 sudo chmod 600 /swapfile
 sudo mkswap /swapfile
@@ -104,230 +107,390 @@ sudo swapon /swapfile
 grep -q '^/swapfile ' /etc/fstab || echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 free -h
 sudo swapon --show
-```
+~~~
 
-The final output must show one `/swapfile` of 2 GB. Do not add more swap to hide sustained memory
-pressure; stop an unused application or review a VPS resize instead.
+The output must show `/swapfile` with 2 GiB. Swap is an emergency buffer, not extra working memory.
+Sustained swap use requires stopping a workload or reviewing capacity.
 
-## 5. Prepare the network boundary
+If pasted terminal text starts with characters such as `^[[200~`, cancel the command and paste it
+again as plain text. Those characters are bracketed-paste control sequences.
 
-Coolify needs these inbound TCP ports while it is being configured:
+## 5. Configure the OVH edge firewall
 
-| Port | Source | Purpose |
-| :--- | :--- | :--- |
-| 22 | Amr's current public IP only when practical | SSH |
-| 80 | anywhere | HTTP and certificate issuance |
-| 443 | anywhere | HTTPS applications and dashboard |
-| 8000 | Amr's current public IP during setup | initial Coolify dashboard |
-| 6001 | Amr's current public IP during setup | dashboard real-time connection |
-| 6002 | Amr's current public IP during setup | dashboard terminal |
+In the OVH Control Panel:
 
-In the OVH Control Panel, open **Network → Public IP Addresses**, enable **Advanced mode**, locate
-the VPS IP, and inspect the **Firewall** column. If **Create Firewall** is offered, prepare only the
-rules above and review them before enabling the firewall. Keep SSH allowed while testing; an
-incorrect rule can lock out the server.
+1. Open **Network**.
+2. Open **Public IP Addresses**.
+3. Locate `135.125.254.59`.
+4. Open its edge firewall controls. The UI used during setup did not show an **Advanced mode**
+   switch, so do not wait for one.
+5. Create allow rules before the final deny rule.
+6. Enable the completed rules and verify SSH in a second session before closing the first.
 
-After the Coolify dashboard works through HTTPS, close public access to 8000, 6001, and 6002. Keep
-22 restricted and keep 80 and 443 public. Do not publish PostgreSQL, Redis, Docker, or application
-container ports directly.
+The final public boundary is:
+
+| Protocol | Port | Source | Purpose |
+| :--- | :--- | :--- | :--- |
+| TCP | 22 | Amr's current public IP when practical | SSH |
+| TCP | 80 | Any | HTTP redirect and certificate validation |
+| TCP | 443 | Any | HTTPS |
+| UDP | 443 | Any | HTTP/3 handled by the Coolify proxy |
+| Any | Any | Any | Deny remaining inbound traffic |
+
+Ports 6001, 6002, 8000, and 8080 must not be reachable from the internet after setup. PostgreSQL
+5432, Redis 6379, and Docker must never be published publicly.
+
+When changing the SSH source address, add and verify the replacement allow rule before removing the
+old one.
 
 ## 6. Install Coolify
 
-Coolify's supported automated installation for an Ubuntu LTS server is:
+Confirm outbound access:
 
-```sh
+~~~sh
+getent hosts github.com
+curl -I https://cdn.coollabs.io
+~~~
+
+Download, inspect, and run the supported installer:
+
+~~~sh
 curl -fsSL https://cdn.coollabs.io/coolify/install.sh -o /tmp/install-coolify.sh
 less /tmp/install-coolify.sh
 sudo bash /tmp/install-coolify.sh
-```
+~~~
 
-Reviewing the downloaded file separates retrieval from root execution. Wait for the installer to
-print **Congratulations** and its dashboard URL.
+Press `q` to exit `less`. Continue only after the installer prints its success message.
 
-Immediately open `http://VPS_IP:8000` from the allowed address and create the first administrator
-account. The first visitor to an unclaimed installation can become its administrator, so do not
-leave the registration screen unattended or publicly reachable.
+Open `http://135.125.254.59:8000`, immediately create the first Coolify administrator, and finish
+the initial setup. Use a password that satisfies Coolify's displayed requirements.
 
-In Coolify:
+## 7. Validate this machine as the Coolify server
 
-1. Open the user menu and configure multi-factor authentication if the installed release offers it.
-2. Open **Servers → localhost → General** and confirm validation succeeds.
-3. Open **Servers → localhost → Docker Cleanup** and keep scheduled cleanup enabled.
-4. Do not add another server, build server, or paid integration.
+During setup, choose **This machine**.
 
-Copy `/data/coolify/source/.env` to a protected location outside the VPS. It contains Coolify's
-`APP_KEY`, which is required to decrypt saved secrets after restoration. Never commit or print it in
-an issue, workflow log, or chat.
+If validation reports:
 
-## 7. Put the dashboard behind its hostname
+~~~text
+root@host.docker.internal: Permission denied (publickey)
+~~~
 
-Prepare these external changes and review them before saving:
+copy the public key shown by Coolify into root's SSH authorization file:
 
-1. In Cloudflare, open `project-graphite.com` and select **DNS → Records → Add record**.
-2. Choose type **A**, name `coolify`, content the VPS IPv4, and initially set **Proxy status** to
-   **DNS only**.
-3. In Coolify, open **Settings** and set the instance domain to
-   `https://coolify.project-graphite.com`.
-4. Save, wait for the proxy and certificate to become healthy, then open the HTTPS address in a new
-   browser session.
-5. Confirm login works through the hostname before closing ports 8000, 6001, and 6002 at the
-   provider firewall.
+~~~sh
+sudo install -d -m 700 /root/.ssh
+sudoedit /root/.ssh/authorized_keys
+sudo chmod 600 /root/.ssh/authorized_keys
+~~~
 
-Do not expose the dashboard on the apex domain. Do not create a wildcard DNS record.
+Add the public key as one complete line, save, return to Coolify, and validate again. Compare the
+fingerprint shown by Coolify before authorizing it. Do not copy a private key.
 
-## 8. Verify deployment image access
+## 8. Put Coolify behind its domain
 
-After the Message Lab workflow has published its first immutable image tag, open the
-**Project-Graphite** organisation on GitHub and select **Packages**. Check both
-`graphite-message-lab/web` and `graphite-message-lab/worker`.
+In Cloudflare, create:
 
-For this public demonstration app, each package must be publicly readable so the VPS does not need
-a long-lived GitHub token. If a package is private, open **Package settings**, select **Change
-visibility**, review the package name, and change it to **Public**. Changing package visibility is a
-separate external write; review it when the package exists. Do not make private project images
-public to reuse this setup.
+| Type | Name | Content | TTL | Proxy status |
+| :--- | :--- | :--- | :--- | :--- |
+| A | `coolify` | `135.125.254.59` | 300 or Auto | DNS only during setup |
 
-Confirm anonymous access from a signed-out browser or a shell that is not signed in to GHCR:
+In Coolify's global **Settings**, set:
 
-```sh
-docker manifest inspect ghcr.io/project-graphite/graphite-message-lab/web:IMAGE_TAG
-docker manifest inspect ghcr.io/project-graphite/graphite-message-lab/worker:IMAGE_TAG
-```
+~~~text
+https://coolify.project-graphite.com
+~~~
 
-Replace `IMAGE_TAG` with the exact `sha-...` tag from the successful workflow. Both commands must
-return a manifest before continuing.
+Save, wait for the certificate, and sign in through HTTPS before blocking direct dashboard ports.
 
-## 9. Add Graphite Message Lab without deploying it
+## 9. Remove direct Coolify port exposure
 
-In Coolify:
+Create `/data/coolify/source/docker-compose.custom.yml`:
 
-1. Open **Projects → Add** and name the project `Graphite`.
-2. Add a production environment named `production`.
-3. Inside that environment, select **+ New**.
-4. Choose **Public Repository** and enter
-   `https://github.com/Project-Graphite/graphite-message-lab`.
-5. Select **Check Repository**.
-6. Under **Configuration → General**, set **Build Pack** to **Docker Compose**.
-7. Set **Branch** to `main`.
-8. Set **Base Directory** to `/`.
-9. Set **Docker Compose Location** to `/compose.production.yaml`.
-10. Save and reload the Compose definition.
+~~~yaml
+services:
+  coolify:
+    ports: !reset []
+  soketi:
+    ports: !reset []
+~~~
 
-Confirm the parsed services are `postgres`, `redis`, `web`, and `worker`. The web and worker must
-use GHCR images; Coolify must not build them on the VPS. PostgreSQL and Redis must have named
-volumes. Only `web` may receive a public domain.
+Apply it from the directory containing Coolify's real `.env` and base Compose file:
 
-## 10. Enter Message Lab configuration
+~~~sh
+cd /data/coolify/source
+sudo docker compose --env-file .env \
+  -f docker-compose.yml \
+  -f docker-compose.custom.yml \
+  up -d
+~~~
 
-Open the application's **Environment Variables** page. Coolify derives these fields from the
-Compose file:
+Do not run the command from `/home/ubuntu`; it will look for the wrong files.
+
+Verify:
+
+~~~sh
+sudo ss -lntup
+sudo docker ps --format 'table {{.Names}}\t{{.Ports}}'
+~~~
+
+The `coolify` and real-time containers must not publish 8000, 6001, or 6002. The
+`coolify-proxy` owns public 80 and 443. It may bind 8080 locally, but the OVH firewall blocks it.
+
+## 10. Harden and maintain Coolify
+
+The completed settings are:
+
+- administrator registration disabled after the first account was created;
+- two-factor authentication enabled;
+- API access enabled only for the authenticated GitHub deployment webhook;
+- Coolify update check daily;
+- Coolify automatic update Sunday at 04:00;
+- Docker cleanup Sunday at 05:00;
+- cleanup does not delete volumes or networks;
+- Coolify instance backup daily at 03:00;
+- seven local instance backups retained;
+- a manual instance backup completed and was downloaded.
+
+Keep a protected copy of `/data/coolify/source/.env` outside the VPS. Its application key is needed
+to decrypt restored Coolify secrets. Never commit or paste that file.
+
+A Coolify instance backup does not replace a logical PostgreSQL backup. Application database backup
+and restore testing remain separate operational work.
+
+## 11. Publish deployable images
+
+Message Lab builds in GitHub Actions so the VPS does not compile application images. The workflow
+publishes:
+
+~~~text
+ghcr.io/project-graphite/graphite-message-lab/web:sha-<commit>
+ghcr.io/project-graphite/graphite-message-lab/worker:sha-<commit>
+ghcr.io/project-graphite/graphite-message-lab/web:main
+ghcr.io/project-graphite/graphite-message-lab/worker:main
+~~~
+
+SHA tags are immutable rollback points. The `main` tags move only after tests pass.
+
+Both Message Lab packages are public so Coolify can pull them without a GitHub package token:
+
+~~~sh
+sudo docker manifest inspect ghcr.io/project-graphite/graphite-message-lab/web:main
+sudo docker manifest inspect ghcr.io/project-graphite/graphite-message-lab/worker:main
+~~~
+
+Private projects should use a narrowly scoped registry credential instead.
+
+## 12. Create Graphite Message Lab in Coolify
+
+1. Open **Projects** and create or open **Graphite**.
+2. Open its production environment.
+3. Select **+ New**.
+4. Choose **Public Repository**.
+5. Enter `https://github.com/Project-Graphite/graphite-message-lab`.
+6. Select branch `main`.
+7. Choose Docker Compose.
+8. Set the Compose file to `/compose.production.yaml`.
+9. Save and use **Reload Compose** after source-definition changes.
+
+The parsed services are `web`, `worker`, `postgres`, and `redis`. The application must show
+two persistent storages. Only `web` receives a public domain.
+
+## 13. Configure Message Lab
+
+Under **Environment Variables**, set:
 
 | Name | Value |
 | :--- | :--- |
-| `IMAGE_TAG` | an approved immutable `sha-...` tag, or `latest` only for the first disposable test |
-| `ALLOWED_HOSTS` | `message-lab.project-graphite.com` |
+| `IMAGE_TAG` | `main` |
+| `ALLOWED_HOSTS` | `message-lab.project-graphite.com,localhost` |
 | `CSRF_TRUSTED_ORIGINS` | `https://message-lab.project-graphite.com` |
-| `POSTGRES_PASSWORD` | a newly generated random value |
-| `SECRET_KEY` | a separately generated random value |
+| `POSTGRES_PASSWORD` | unique generated secret |
+| `SECRET_KEY` | separate unique generated secret |
 
-Generate the two secrets locally or with a password manager. Do not reuse them and do not place
-their values in the platform registry, Compose file, shell history, screenshots, or chat.
+Keep secret values only in Coolify. Do not place them in GitHub, Compose, screenshots, shell
+history, documentation, or chat.
 
-For the `web` service, set **Domains** to:
+Set the `web` service domain to:
 
-```text
+~~~text
 https://message-lab.project-graphite.com:8000
-```
+~~~
 
-The `:8000` suffix tells the Coolify proxy which internal container port to use; visitors still use
-normal HTTPS on port 443. Do not add domains to PostgreSQL, Redis, or the worker.
+The suffix identifies the container's internal port. Visitors still connect to HTTPS 443.
 
-## 11. Prepare the public application hostname
+## 14. Create application DNS and issue TLS
 
-In Cloudflare, prepare an **A** record named `message-lab` pointing to the VPS IPv4. Use
-**DNS only** for the first certificate and application test. After HTTPS is healthy, Cloudflare
-proxying can be enabled and verified separately.
+In Cloudflare, create:
 
-Do not change the apex records used by Graphite Hub. Do not expose ports 5432, 6379, or 8000 at the
-VPS firewall; Coolify routes the public hostname through 443.
+| Type | Name | Content | TTL | Proxy status |
+| :--- | :--- | :--- | :--- | :--- |
+| A | `message-lab` | `135.125.254.59` | 300 | DNS only |
 
-## 12. Review before the first deployment
+Confirm resolution:
 
-Before selecting **Deploy**, confirm:
+~~~sh
+getent hosts message-lab.project-graphite.com
+~~~
 
-- the exact repository, branch, and Compose file are correct;
-- required secrets show as configured without revealing their values;
-- the image tag exists in public GHCR;
-- each service has a memory and CPU limit;
-- PostgreSQL and Redis use persistent named volumes;
-- only the web service has a domain;
-- no service publishes a host port;
-- VPS memory and disk have sufficient free capacity.
+Deploy from Coolify and wait for every service to become healthy. Coolify obtains the Let's Encrypt
+certificate after DNS resolves and ports 80 and 443 answer.
 
-Selecting **Deploy** creates containers, networks, and persistent volumes on the VPS and is a
-separate external mutation. Review and approve that deployment at the time it is performed.
+The first deployment exposed two corrections:
 
-## 13. Acceptance checks after an approved deployment
+- the host Compose validator rejected an empty worker `entrypoint`, so production Compose now
+  relies on the image entrypoint and sets the Celery command;
+- the health check calls `localhost`, so `ALLOWED_HOSTS` includes the hostname and `localhost`.
 
-In Coolify, open **Deployments** and wait for success. Then check each service under **Logs**.
-PostgreSQL and Redis should become healthy, the web startup should complete migrations, and the
-worker should connect to Redis.
+A temporary **Not secure** warning is acceptable only while the certificate is being issued. The
+finished site must return HTTP 200 with a valid certificate.
 
-Open `https://message-lab.project-graphite.com`, submit a non-sensitive message, and confirm it
-moves from queued to processed. Refresh the page and confirm it persists.
+## 15. Enable automatic deployments
 
-Read-only server checks are:
+Keep Coolify's application **Auto Deploy** switch off. GitHub Actions controls the order so Coolify
+cannot deploy before tests and images finish.
 
-```sh
+### Enable API access
+
+1. Open global **Settings**.
+2. Open **Configuration → Advanced**.
+3. Enable **API Access**.
+4. Save.
+
+### Create a deploy-only token
+
+1. Open **Keys & Tokens → API Tokens**.
+2. Select **Add**.
+3. Name the token for GitHub deployment.
+4. Grant only `deploy`.
+5. Choose a finite expiration.
+6. Create it and copy it once into a password manager.
+
+### Copy the resource webhook
+
+1. Open the Graphite Message Lab Compose application.
+2. Open its **Settings** or configuration sidebar.
+3. Open **Webhooks**.
+4. Copy **Deploy Webhook (auth required)**.
+
+### Store GitHub secrets
+
+In the Message Lab repository, open **Settings → Secrets and variables → Actions** and create:
+
+| Secret | Value |
+| :--- | :--- |
+| `COOLIFY_WEBHOOK` | authenticated resource deploy webhook URL |
+| `COOLIFY_TOKEN` | deploy-only Coolify API token |
+
+Never store either value as a normal variable or in workflow YAML.
+
+### Deployment order
+
+For each push to `main`, `.github/workflows/main.yml`:
+
+1. runs the application test suite;
+2. stops if tests fail;
+3. builds the web and worker image;
+4. publishes immutable `sha-<commit>` tags;
+5. updates both `main` tags;
+6. records immutable deployment metadata when enabled;
+7. sends an authenticated `POST` request to the Coolify webhook.
+
+Use `POST`; this installation returned HTTP 405 for `GET`.
+
+Coolify then reads the current Compose source, pulls the new `main` images, runs the web startup
+migration, waits for health, and replaces the containers. A successful webhook response only means
+the deployment was queued; confirm completion under **Deployments**.
+
+## 16. Verify the completed system
+
+Check externally:
+
+~~~sh
+curl -I https://coolify.project-graphite.com
+curl -I https://message-lab.project-graphite.com
+curl https://message-lab.project-graphite.com/api/messages/
+~~~
+
+The site must return HTTP 200. The public endpoint must return only administrator-approved messages.
+
+Check the VPS:
+
+~~~sh
 free -h
 df -h /
-docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Image}}'
-docker stats --no-stream
-```
+sudo swapon --show
+sudo docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Image}}'
+sudo docker stats --no-stream
+~~~
 
-Target steady-state use is below 75% RAM and below 70% disk. Stop adding projects if swap grows
-continuously, an application is OOM-killed, or free disk approaches 10 GB.
+For Message Lab, verify private submissions do not appear publicly, publication requests await
+approval, the worker processes messages, and the administrator can publish, unpublish, search,
+filter, and delete.
 
-## 14. Backups
+Create an administrator interactively. Identify the web container:
 
-The included OVH backup retains only the previous daily server image. It does not replace logical
-database backups.
+~~~sh
+sudo docker ps --format 'table {{.Names}}\t{{.Image}}' | grep graphite-message-lab
+~~~
 
-In Coolify, open the PostgreSQL service, select **Backups**, and add a daily schedule. Keep seven
-small local dumps initially and select **Backup Now**. Verify the execution is successful and the
-file size is non-zero. A backup is not proven until it has been restored into a disposable database
-and the application can read it.
+Then run:
 
-Adding S3-compatible storage, paid retention, or another backup product is a separate billing and
-credential decision. Prepare its exact provider, capacity, permissions, and expected price before
-enabling it.
+~~~sh
+sudo docker exec -it CONTAINER_NAME python manage.py createsuperuser --username USERNAME
+~~~
 
-## 15. Capacity rules for a 4 GB VPS
+Enter the password only at Django's hidden prompt. Django stores a salted hash in PostgreSQL. Never
+put an administrator password into Compose, Git, documentation, or a command argument.
 
-- Keep Graphite Hub and other static frontends on Cloudflare Pages.
-- Build images in GitHub Actions and pull them from GHCR.
-- Prefer one shared PostgreSQL and Valkey service when later projects can be safely separated by
-  database, role, and credentials.
-- Keep each small web or worker container near 128-384 MB when the application permits it.
-- Do not install Kubernetes, Elasticsearch, a service mesh, Prometheus, or a log aggregation stack.
-- Do not resize the VPS without a current resource report, the exact new recurring price, and
-  explicit approval.
+## 17. Roll back
 
-## 16. Rollback and removal boundaries
+1. Identify the last known-good `sha-...` image tag.
+2. Check whether a database migration prevents image rollback.
+3. Change Coolify's `IMAGE_TAG` from `main` to that exact SHA tag.
+4. Select **Deploy**, not Restart.
+5. Verify health and the public site.
+6. Set `IMAGE_TAG` back to `main` and deploy once to resume automatic updates.
 
-Changing `IMAGE_TAG` to a previously verified immutable tag and redeploying is the normal
-application rollback. A database migration can make image rollback unsafe, so inspect migration
-compatibility first.
+Never roll back a database by deleting volumes.
 
-Deleting a Coolify application, volume, database, DNS record, backup, or VPS can permanently remove
-data. Before any removal, identify the exact resource, export required state, verify the export,
-show the destructive action, and obtain separate approval.
+## 18. Add another small project
 
-## Sources
+1. Keep it in its own repository.
+2. Add production Compose that pulls prebuilt images.
+3. Add health checks, restart policies, resource limits, and named volumes.
+4. Publish SHA and `main` tags only after tests.
+5. Create a separate Coolify application and network.
+6. Store runtime secrets only in Coolify.
+7. Attach a unique subdomain only to the public service.
+8. Create a Cloudflare DNS-only A record to the VPS.
+9. Use a resource-specific webhook and deploy-only token.
+10. Verify backup, restore, rollback, memory, disk, TLS, and background work.
+
+Do not add Kubernetes, a service mesh, Elasticsearch, or a monitoring stack to this host. Keep
+static sites on Cloudflare Pages.
+
+## 19. Capacity and billing boundaries
+
+Review capacity before another project when steady memory exceeds 75%, swap grows, a container is
+OOM-killed, free disk approaches 10 GB, or builds occur on the VPS.
+
+A resize, additional IP, paid backup, object storage, managed database, or second server is a new
+billing decision. Prepare the exact resource, recurring total, tax, and downtime, then obtain
+approval before changing it.
+
+## 20. Destructive boundaries
+
+Deleting a Coolify application, Docker volume, database, DNS record, backup, token, or VPS can
+remove data or access. Identify the exact resource, export and verify required state, show the
+deletion and impact, and obtain separate approval.
+
+## References
 
 - [OVHcloud VPS plans](https://us.ovhcloud.com/vps/)
 - [Coolify self-hosted installation](https://coolify.io/docs/start-with-self-hosted)
 - [Coolify firewall requirements](https://coolify.io/docs/core/infrastructure/servers/firewall)
 - [Coolify Docker Compose applications](https://coolify.io/docs/applications/builds/docker-compose)
+- [Coolify GitHub Actions deployment](https://coolify.io/docs/applications/sources/github/actions)
+- [Coolify deployment webhooks](https://coolify.io/docs/core/automation/deploy-webhooks)
 - [Coolify database backups](https://coolify.io/docs/databases/backups)
 - [OVHcloud Network Security Dashboard](https://help.ovhcloud.com/csm/en-au-network-security-dashboard?id=kb_article_view&sysparm_article=KB0060692)

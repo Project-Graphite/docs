@@ -4,18 +4,20 @@ The public `actions` repository contains reusable GitHub Actions workflows. Proj
 reviewed commit or version tag rather than `main`.
 
 ```text
-pull request -> detect services -> checks -> image build without push
-main push    -> detect services -> checks -> publish immutable GHCR images -> record platform tags
+pull request -> checks -> image build without push
+main push    -> tests -> publish SHA and main images -> record tag -> authenticated Coolify webhook
+Coolify      -> pull main images -> migrate -> health check -> replace containers
 platform tag update -> validate registry -> sync public Hub registry
 ```
 
 `reusable-deploy.yml` records tags only when the platform entry declares `kind: compose`. It does
-not access Coolify or the VPS. This separation means repository CI can publish an artifact without
-holding server credentials or triggering an unreviewed deployment.
+not access Coolify or the VPS. The project workflow separately holds a resource-specific Coolify
+webhook and deploy-only token in GitHub Actions secrets.
 
-Coolify pulls the prebuilt images declared by each project's production Compose file. Selecting
-Deploy remains a reviewed operations action. A future deploy webhook may automate that step after
-rollback, secret handling, backups, and resource bounds are proven.
+Coolify pulls prebuilt images declared by the production Compose file. Direct Coolify Auto Deploy
+stays disabled so a repository push cannot race the image build. The workflow calls the webhook
+only after its test and image jobs succeed. Manual Deploy remains available for first deployment,
+configuration changes, and rollback.
 
 Organisation defaults remain read-only. Only the image-build job receives `packages: write`, and
 the GitHub App can update only repositories explicitly installed for its registry-sync purpose.

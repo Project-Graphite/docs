@@ -42,7 +42,8 @@ Review the registry output before merging.
 ## 4. Publish images
 
 The project workflow publishes
-`ghcr.io/project-graphite/<repository>/<service>:sha-<commit>` and records the immutable tag in
+`ghcr.io/project-graphite/<repository>/<service>:sha-<commit>` and
+`ghcr.io/project-graphite/<repository>/<service>:main`. It records the immutable tag in
 `platform/tags/<slug>.json`. The release-record workflow does not have VPS or Coolify credentials.
 
 ## 5. Prepare Coolify
@@ -54,7 +55,20 @@ directly in Coolify. Never put them in the registry, repository, command history
 Selecting Deploy is an external VPS write. Review the parsed services, images, volumes, domains,
 health checks, resource limits, and current server capacity before receiving specific approval.
 
-## 6. Expose and verify
+## 6. Configure automatic deployment
+
+After the first manual deployment succeeds:
+
+1. keep Coolify's direct Auto Deploy disabled;
+2. enable Coolify API access;
+3. create a finite-lived API token with only `deploy` permission;
+4. copy the application's authenticated resource webhook;
+5. store it as `COOLIFY_WEBHOOK` and the token as `COOLIFY_TOKEN` in repository Actions secrets;
+6. call the webhook with `POST` only after tests and image publication succeed.
+
+Do not reuse one resource URL across unrelated projects. Never commit the URL or token.
+
+## 7. Expose and verify
 
 Add the project's public hostname in Cloudflare and attach it only to the public service in Coolify.
 Verify HTTPS, health, persistence, background work, restart behavior, logs, backups, and resource
@@ -71,3 +85,4 @@ usage. Add the live link and concrete outcome to its Hub showcase.
 - [ ] workloads fit the VPS without sustained swap or low disk
 - [ ] hostname is configured in Cloudflare and only the web service is public
 - [ ] persistence, worker processing, restart, and rollback are tested
+- [ ] direct Auto Deploy is off and the CI webhook runs only after tests and image publication

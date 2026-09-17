@@ -1,16 +1,24 @@
-# OVH and Coolify platform preparation
+# OVH and Coolify platform
 
-## 2026-09-17
+## 2026-09-17 — completed deployment
 
-Replaced the planned GKE deployment path with a cost-bounded OVH VPS-1 and self-hosted Coolify
-path. The platform registry now describes Compose deployments, Graphite Message Lab has a
-resource-limited production stack for its web, worker, PostgreSQL, and Redis services, and the
-project template includes a small production Compose example.
+Purchased the approved USD 5.35 OVH VPS, installed Ubuntu 24.04 and Coolify, added emergency swap,
+restricted the OVH edge firewall, removed direct Coolify dashboard port exposure, configured the
+dashboard domain and TLS, enabled two-factor authentication, closed registration, and scheduled
+instance backup, updates, and Docker cleanup.
 
-Added an operator runbook covering the order review boundary, Ubuntu preparation, network rules,
-Coolify setup, Cloudflare DNS, application configuration, deployment review, backups, capacity,
-rollback, and removal. No OVH, Cloudflare, Google Cloud, GitHub, or other external resource was
-created, changed, purchased, deployed, or deleted.
+Deployed Graphite Message Lab from public GHCR images with persistent PostgreSQL and Redis volumes,
+Cloudflare DNS, valid HTTPS, health checks, resource limits, and a Celery worker. Added GitHub
+Actions deployment automation using moving `main` images, immutable SHA rollback images, a
+resource-specific Coolify webhook, and a deploy-only token. The workflow tests before publishing
+images and triggers Coolify with POST only after publication succeeds.
 
-Validated the registry and generated catalog, both production Compose definitions, the Message Lab
-production images, service health, migrations, worker startup, and all eight application tests.
+Replaced the preparation-only runbook with the completed purchase-to-redeployment procedure and
+updated architecture, decision, onboarding, workflow, recommendations, and repeatable-command
+documentation to match the running system.
+
+## 2026-09-17 — preparation
+
+Replaced the planned GKE path with a cost-bounded OVH VPS and self-hosted Coolify design. Converted
+the platform registry, Message Lab, project template, and shared workflows from Kubernetes-oriented
+deployment to resource-limited production Compose definitions and prebuilt GHCR images.

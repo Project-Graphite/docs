@@ -8,13 +8,13 @@ Coolify on one OVH VPS.
 member or project pull request
         |
         v
-shared checks and image build ---> GHCR immutable image
+shared checks and image build ---> GHCR SHA and main images
         |                              |
         v                              v
-platform registry and image tags     Coolify pulls image
+platform registry and image tags     authenticated deploy webhook
         |                              |
         v                              v
-Graphite Hub registry sync       production Compose services
+Graphite Hub registry sync       Coolify pulls and health-checks services
                                        |
 visitor -> Cloudflare -> Coolify proxy -> project web service
 ```
@@ -26,6 +26,7 @@ Each Compose project provides:
 - named volumes for persistent state
 - secret values stored only in Coolify
 - one public domain attached only to its web service
+- deployment triggered only after the project's tests and image publication succeed
 
 Coolify owns the reverse proxy, HTTPS, deployments, and service logs. Project containers share one
 Docker host, so this is operational separation for trusted projects rather than a security boundary
