@@ -46,8 +46,10 @@ gh secret set PLATFORM_APP_PRIVATE_KEY --repo project-graphite/project-template 
 Read the key **from the file**. Pasting it into a terminal puts it in your shell history and risks
 mangling the newlines, which fails with an unhelpful error.
 
-**3. Verify before revoking.** Re-run the latest `platform` Main workflow and confirm it reaches
-`Graphite Hub updated.` Do not skip this — if the new key is wrong you want both still working.
+**3. Verify before revoking.** Re-run the latest `platform` Main workflow and confirm its Sync to
+Graphite Hub step succeeds; it ends with `Graphite Hub updated.` or
+`Registry unchanged; Graphite Hub already current.` Do not skip this — if the new key is wrong you
+want both still working.
 
 **4. Delete the old key** on the same GitHub App page.
 

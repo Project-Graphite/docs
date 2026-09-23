@@ -7,9 +7,9 @@ fix. Most of them present with an error pointing somewhere other than the proble
 
 ## A container is repeatedly restarting or reports OOMKilled
 
-Inspect its Coolify logs and the read-only output of `docker stats --no-stream` and `free -h`.
-Stop an unused demonstration before considering a resize. Do not raise a service limit or resize
-the VPS without actual usage evidence, the exact recurring price, and approval.
+Inspect its Coolify logs and the read-only output of `sudo docker stats --no-stream` and
+`free -h`. Stop an unused demonstration before considering a resize. Do not raise a service limit or
+resize the VPS without actual usage evidence, the exact recurring price, and approval.
 
 ## A container reports an image pull error
 
@@ -44,7 +44,7 @@ calling job grants it.
     permissions:
       contents: read
       packages: write
-    uses: project-graphite/actions/.github/workflows/reusable-docker-build-push.yml@v1
+    uses: project-graphite/actions/.github/workflows/reusable-docker-build-push.yml@main
 ```
 
 Widening the organisation default to read-write would also fix it, and is the wrong trade: every
@@ -76,7 +76,7 @@ all**. No visibility setting changes this; it is a plan limit.
 **Fix.** Set them as repository secrets on the private repository:
 
 ```sh
-gh secret set PLATFORM_APP_ID --repo project-graphite/platform --body "4923055"
+gh secret set PLATFORM_APP_CLIENT_ID --repo project-graphite/platform --body "<Client ID from the Graphite Deploy app's General settings>"
 gh secret set PLATFORM_APP_PRIVATE_KEY --repo project-graphite/platform < key.pem
 ```
 
