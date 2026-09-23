@@ -9,15 +9,18 @@
 ## Hostnames
 
 ```text
-project-graphite.com                 Graphite Hub
-<slug>.project-graphite.com          deployed project
-project-graphite.com/members/<name>  member portfolio
-project-graphite.com/projects/<slug> project case study
+project-graphite.com                      Graphite Hub
+<subdomain>.project-graphite.com          deployed project
+project-graphite.com/members/<handle>     member portfolio
+project-graphite.com/projects/<slug>      project case study
+project-graphite.com/epics/<slug>         epic
+project-graphite.com/epics/<epic>/<slug>  project inside an epic
 ```
 
-Cloudflare Pages owns the Hub hostname. Application subdomains point to the VPS, and Coolify's proxy
-maps each hostname to the declared web service and internal port. Database, queue, worker, and
-application ports are never published directly on the host.
+Cloudflare Pages owns the Hub hostname. `compose` subdomains point to the VPS, where Coolify's proxy
+maps each hostname to the declared web service and internal port; `pages` subdomains are Cloudflare
+Pages custom domains. Database, queue, worker, and application ports are never published directly
+on the host.
 
 ## Isolation
 

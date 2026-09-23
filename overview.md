@@ -15,8 +15,8 @@ platform registry and image tags     authenticated deploy webhook
         |                              |
         v                              v
 Graphite Hub registry sync       Coolify pulls and health-checks services
-                                       |
-visitor -> Cloudflare -> Coolify proxy -> project web service
+                                           |
+visitor -> Cloudflare DNS -> Coolify proxy -> project web service
 ```
 
 Each Compose project provides:

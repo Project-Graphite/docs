@@ -11,8 +11,8 @@ more until you grant it.
 
 | Team | Gives | Use for |
 | :--- | :--- | :--- |
-| `contributors` | read on `actions`, `project-template`, `platform` | everyone |
-| `maintainers` | admin everywhere | people who own the platform with you |
+| `contributors` | read on `actions`, `project-template`, `platform`, `docs` | everyone |
+| `maintainers` | admin on `actions`, `platform`, `project-template`, `.github`, `graphite-hub`, `docs` | people who own the platform with you |
 
 Add nearly everyone to `contributors`. `maintainers` is for someone you would trust to change how
 every project is built.
@@ -58,6 +58,6 @@ editing `.graphite.yml` in their own repository; the registry sync validates it,
 merges the `platform` pull request without maintainer review. Person entries still go through a
 maintainer.
 
-**Rulesets do not protect private repositories on the free plan.** `platform` and
-`project-template` have no branch protection available. What protects them is permissions: nobody
-outside `maintainers` has write access.
+**Rulesets do not protect private repositories on the free plan.** `platform`, `project-template`,
+`graphite-hub` and `docs` have no branch protection available. What protects them is permissions:
+nobody outside `maintainers` has write access.

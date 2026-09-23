@@ -10,7 +10,8 @@ my-project/
 ├── api/Dockerfile
 ├── worker/Dockerfile
 ├── compose.yaml
-└── compose.override.yaml
+├── compose.override.yaml
+└── compose.production.yaml
 ```
 
 `compose.yaml` and `compose.override.yaml` are for local development. `compose.production.yaml`

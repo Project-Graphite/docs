@@ -5,14 +5,14 @@
 | Thing | Rule | Example |
 | :--- | :--- | :--- |
 | Repository | lowercase, hyphenated | `game-forge` |
-| Slug | equals the repository name | `game-forge` |
+| Slug | equals the repository name, except for an epic's child projects | `game-forge` |
 | Service folder | lowercase, describes its role | `frontend`, `server`, `worker` |
 | Person handle | lowercase, short, memorable | `amr` |
-| Hostname | `<slug>.project-graphite.com` | `game-forge.project-graphite.com` |
+| Hostname | one label below `project-graphite.com`, usually the slug | `game-forge.project-graphite.com` |
 | Image | `ghcr.io/project-graphite/<repo>/<service>` | `.../game-forge/server` |
 
-The slug is the repository name, the subdomain and the URL segment. Renaming it later means
-renaming the repository, breaking image names and invalidating links. Choose once.
+The slug is the URL segment and, for top-level projects, the repository name. Renaming it later
+means renaming the repository, breaking image names and invalidating links. Choose once.
 
 Service folders are named for what they are, not what they use. `server`, not `nestjs`.
 

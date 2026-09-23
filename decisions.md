@@ -39,7 +39,7 @@ and kernel. Only trusted organisation projects belong on this host.
 ## Static work stays off the VPS
 
 Graphite Hub and static project frontends remain on Cloudflare Pages. GitHub Actions builds dynamic
-service images. This reserves the 4 GB VPS for APIs, SSR processes, workers, PostgreSQL, and Valkey.
+service images. This reserves the 4 GB VPS for APIs, SSR processes, workers, PostgreSQL, and Redis.
 
 ## Every long-running container has a resource ceiling
 
