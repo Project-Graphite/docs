@@ -41,9 +41,10 @@ Push the change to `main`. `.github/workflows/registry.yml` dispatches `sync-reg
 ## 4. Publish images
 
 The project workflow publishes
-`ghcr.io/project-graphite/<repository>/<service>:sha-<commit>` and
-`ghcr.io/project-graphite/<repository>/<service>:main`. It records the immutable tag in
-`platform/tags/<slug>.json`. The release-record workflow does not have VPS or Coolify credentials.
+`ghcr.io/project-graphite/<repository>/<service>:sha-<short commit>` and
+`ghcr.io/project-graphite/<repository>/<service>:latest`. For a `compose` entry it records the
+immutable tag in `platform/tags/<slug>.json`. The release-record workflow does not have VPS or
+Coolify credentials.
 
 ## 5. Prepare Coolify
 

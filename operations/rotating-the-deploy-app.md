@@ -1,7 +1,9 @@
 # Rotating the deploy app key
 
-The `graphite-deploy` GitHub App is what lets CI write to `platform` and `graphite-hub`. Its private
-key is the most sensitive credential in the organisation: it can commit to both.
+The `graphite-deploy` GitHub App lets CI record image tags and merge registry pull requests in
+`platform`, read every repository's `.graphite.yml`, and sync the registry to `graphite-hub`. It is
+installed on every organisation repository, so its private key is the most sensitive credential in
+the organisation: it can commit to any of them.
 
 Rotate it if it leaks, if it appears in a log, or on a schedule you are comfortable with.
 
@@ -10,8 +12,8 @@ Rotate it if it leaks, if it appears in a log, or on a schedule you are comforta
 | | |
 | :--- | :--- |
 | App ID | `4923055` |
-| Permissions | Contents: read and write. Metadata: read. |
-| Installed on | `platform` and `graphite-hub` only |
+| Permissions | Contents: read and write. Pull requests: read and write. Metadata: read. |
+| Installed on | all repositories (the registry sync reads every `.graphite.yml`) |
 | Webhook | disabled |
 
 The App ID is not secret — it is public installation metadata. The private key is.
@@ -56,33 +58,12 @@ want both still working.
 **5. Delete the local `.pem` files.** They have no further use and are the most likely place for
 the key to leak from.
 
-## If a ruleset starts blocking the bot
-
-A ruleset on a repository the app writes to will reject its push with `GH013: Repository rule
-violations found`. The app needs to be a bypass actor:
-
-```sh
-gh api -X PUT repos/project-graphite/graphite-hub/rulesets/<id> --input ruleset.json
-```
-
-with
-
-```json
-"bypass_actors": [
-  { "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always" },
-  { "actor_id": 4923055, "actor_type": "Integration", "bypass_mode": "always" }
-]
-```
-
-`RepositoryRole: 5` is repository admin — that covers you, not the app. A GitHub App is an
-`Integration` and must be listed separately by App ID. This is easy to miss because the failure
-looks like a permissions problem rather than a rule problem.
-
 ## If the key leaks
 
 1. Delete the key on the app page immediately. Every token minted from it stops working.
 2. Generate a new one and update all three locations.
-3. Check `platform` and `graphite-hub` commit history for anything the leak period allows.
+3. Check commit and pull-request history in every organisation repository for anything the leak
+   period allows.
 
-The blast radius is bounded: Contents write on two repositories, no access to secrets, no admin
-rights, no other repository.
+The blast radius is Contents and Pull requests write on every organisation repository. The key
+gives no access to secrets and no admin rights.

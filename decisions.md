@@ -49,11 +49,13 @@ capacity signals.
 
 ## Application deployment follows successful CI
 
-CI publishes immutable SHA images and moving `main` images only after tests pass. Each automated
-application uses a resource-specific Coolify webhook and a deploy-only API token stored as GitHub
-Actions secrets. Coolify's direct Auto Deploy remains disabled, preventing a repository event from
-racing the image build. Manual Deploy remains the path for first deployment, configuration changes,
-and rollback.
+Graphite Message Lab's CI publishes immutable SHA images and moving `main` images only after its
+tests pass; the shared template runs checks on pull requests and, on every push to `main`,
+publishes `sha-<short>` and `latest` images for the changed services. Each automated application
+uses a resource-specific Coolify webhook and a deploy-only API token stored as GitHub Actions
+secrets. Coolify's direct Auto Deploy remains disabled, preventing a repository event from racing
+the image build. Manual Deploy remains the path for first deployment, configuration changes, and
+rollback.
 
 ## Graphite Hub is prerendered
 

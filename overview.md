@@ -8,7 +8,7 @@ Coolify on one OVH VPS.
 member or project pull request
         |
         v
-shared checks and image build ---> GHCR SHA and main images
+shared checks and image build ---> GHCR SHA and latest images
         |                              |
         v                              v
 platform registry and image tags     authenticated deploy webhook

@@ -392,8 +392,9 @@ For each push to `main`, `.github/workflows/main.yml`:
 3. builds the web and worker image;
 4. publishes immutable `sha-<commit>` tags;
 5. updates both `main` tags;
-6. records immutable deployment metadata when enabled;
-7. sends an authenticated `POST` request to the Coolify webhook.
+6. then, in parallel, sends the authenticated `POST` to the Coolify webhook and, when the
+   `GRAPHITE_DEPLOY_ENABLED` repository variable is `true`, records the SHA tag in
+   `platform/tags/graphite-message-lab.json`.
 
 Use `POST`; this installation returned HTTP 405 for `GET`.
 
@@ -458,7 +459,7 @@ Never roll back a database by deleting volumes.
 1. Keep it in its own repository.
 2. Add production Compose that pulls prebuilt images.
 3. Add health checks, restart policies, resource limits, and named volumes.
-4. Publish SHA and `main` tags only after tests.
+4. Publish immutable SHA-tagged images from GitHub Actions.
 5. Create a separate Coolify application and network.
 6. Store runtime secrets only in Coolify.
 7. Attach a unique subdomain only to the public service.

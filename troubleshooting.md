@@ -36,15 +36,16 @@ Two causes, and `actionlint` catches neither.
 ### Cause 1: the caller did not grant the permissions the called workflow needs
 
 A reusable workflow cannot request more than its caller grants. The organisation leaves
-`GITHUB_TOKEN` read-only, so a workflow declaring `packages: write` fails at startup unless the
-calling job grants it.
+`GITHUB_TOKEN` read-only, so `reusable-pr-checks.yml`, which declares `issues: write` and
+`pull-requests: write`, fails at startup unless the calling job grants them.
 
 ```yaml
-  build:
+  conventions:
     permissions:
       contents: read
-      packages: write
-    uses: project-graphite/actions/.github/workflows/reusable-docker-build-push.yml@main
+      issues: write
+      pull-requests: write
+    uses: project-graphite/actions/.github/workflows/reusable-pr-checks.yml@main
 ```
 
 Widening the organisation default to read-write would also fix it, and is the wrong trade: every
@@ -82,22 +83,6 @@ gh secret set PLATFORM_APP_PRIVATE_KEY --repo project-graphite/platform < key.pe
 
 Public repositories pick up organisation secrets automatically, which is why project repositories
 are public and members cannot create private ones.
-
----
-
-## Deploy fails with GH013: Repository rule violations
-
-**Symptom.** The deploy job mints a token, checks out the target repository, then fails on push
-with `GH013: Repository rule violations found for refs/heads/main`.
-
-**Cause.** A ruleset on the target repository requires a pull request, and the GitHub App is not a
-bypass actor. `RepositoryRole: 5` covers repository admins — that is you, not the app.
-
-**Fix.** Add the app by App ID as an `Integration` bypass actor. See
-[operations/rotating-the-deploy-app.md](operations/rotating-the-deploy-app.md).
-
-Any new ruleset on a repository the bot writes to needs this, or deploys start failing in a way
-that looks like a permissions problem.
 
 ---
 
@@ -167,8 +152,8 @@ with leading zeros.
 
 **Cause.** The file was committed with CRLF line endings from a Windows checkout.
 
-**Fix.** Every repository has `.gitattributes` with `* text=auto eol=lf`, inherited from the
-template. If a repository was created some other way, add it. Verify what is actually committed:
+**Fix.** Repositories created from the template have `.gitattributes` with `* text=auto eol=lf`.
+If a repository was created some other way, add it. Verify what is actually committed:
 
 ```sh
 git show HEAD:path/to/script.sh | file -

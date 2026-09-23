@@ -43,8 +43,7 @@ chore: bump vite to 8.0.16
 ```
 
 Merges are squashed and **the PR title becomes the commit message on `main`**, which is why the
-title is checked rather than the branch name. Every repository is configured for squash-only
-merges with the title as the commit subject.
+title is checked rather than the branch name.
 
 ## Pull request size
 
@@ -62,9 +61,9 @@ Large pull requests are not blocked, but they are slower to review and more like
 
 ## Line endings
 
-Every repository has a `.gitattributes` with `* text=auto eol=lf`. Without it, a Windows checkout
-commits CRLF, and a shell script with CRLF fails on Linux with a confusing `bad interpreter` error.
-New repositories inherit this from the template.
+Repositories created from `project-template` inherit a `.gitattributes` with `* text=auto eol=lf`.
+Without it, a Windows checkout commits CRLF, and a shell script with CRLF fails on Linux with a
+confusing `bad interpreter` error.
 
 ## Comments in code
 
@@ -79,8 +78,8 @@ The exception is anything load-bearing for a tool rather than a human: `# noqa`,
 Never in a repository. Not in code, config, commit messages, logs or a pull request description.
 
 The registry names sensitive environment variables a service needs; runtime values live in Coolify
-and build credentials live in GitHub secrets. Every push is scanned over full history, and a
-committed secret fails the build.
+and build credentials live in GitHub secrets. Repositories that call `reusable-gitleaks.yml` scan
+full history on every pull request, and a committed secret fails the check.
 
 If you commit one by accident, rotate it first and rewrite history second. Rewriting alone does not
 help: it is already in the reflog, in forks and in anything that cloned it.
@@ -90,7 +89,9 @@ help: it is already in the reflog, in forks and in anything that cloned it.
 Your own project repository is yours. Merge what you like there.
 
 `platform`, `actions` and `graphite-hub` need review from `@project-graphite/maintainers`, because a
-change there affects everyone else. CODEOWNERS routes this automatically.
+change there affects everyone else. CODEOWNERS requests that review on `platform`, `actions`, and
+graphite-hub's `.github/` and `site/src/data/`; it does not block a merge. Registry-sync pull
+requests on `platform` merge automatically once validation passes.
 
 ## What belongs where
 
