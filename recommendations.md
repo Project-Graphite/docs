@@ -18,7 +18,7 @@
 - Enabled Coolify two-factor authentication, closed registration, scheduled instance backup,
   scheduled updates, and non-destructive Docker cleanup.
 
-## Next, after the first successful lab deployment
+## Next
 
 1. Prove restoration before treating persistent projects as production. Schedule encrypted database
    exports to separately controlled object storage only after the storage cost and credentials are
@@ -30,12 +30,8 @@
 4. Exercise Message Lab rollback and restore, then record the measured recovery result.
 5. Publish an owner-facing incident-triage and spending-anomaly procedure before onboarding
    member-owned stateful services.
-
-## Capacity trigger
-
-Do not resize the VPS pre-emptively. Review capacity when steady memory exceeds 75%, swap use grows,
-an OOM event occurs, free disk approaches 10 GB, or another full-stack project must remain online.
-Prepare the exact larger VPS, recurring price, tax, backup effect, and downtime before approval.
+6. Review capacity against [operations/ovh-coolify.md §19](operations/ovh-coolify.md#19-capacity-and-billing-boundaries)
+   before adding another project.
 
 ## Deliberately deferred
 

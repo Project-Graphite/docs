@@ -12,7 +12,7 @@ runs on Cloudflare Pages; containerized demonstrations run through Coolify on on
 | Prepare the OVH host | [operations/ovh-coolify.md](operations/ovh-coolify.md) |
 | Add a member | [operations/adding-a-person.md](operations/adding-a-person.md) |
 | Retire a project | [operations/retiring-a-project.md](operations/retiring-a-project.md) |
-| Review remaining recommendations | [codex-recs.md](codex-recs.md) |
+| Review remaining recommendations | [recommendations.md](recommendations.md) |
 
 The private `platform` repository holds people, image tags, deployment metadata and the project
 registry synced from each repository's `.graphite.yml`. Production Compose files live with their

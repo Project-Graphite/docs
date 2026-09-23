@@ -40,8 +40,6 @@ approval for a new charge from this historical purchase.
 7. Purchase only after those exact values are accepted.
 8. Wait for OVH to finish provisioning before attempting SSH.
 
-The completed order was accepted at USD 5.35 for the 2-vCore, 4-GB, 40-GB configuration.
-
 ## 2. Create and register the SSH key
 
 From Windows PowerShell, create a dedicated key:
