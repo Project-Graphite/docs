@@ -24,20 +24,19 @@ than the container filesystem. Do not commit credentials or production connectio
 
 ## 3. Register it
 
-Add `projects/<slug>.yml` to the private `platform` repository. Declare:
+Edit `.graphite.yml` at the repository root. The template's copy registers `project-template`
+itself, so replace that entry; its comments describe every field. Declare:
 
-- the owner, authors, status, summary, and optional showcase
+- `slug` set to the repository name, with `kind`, `name`, and `summary`
+- the owner, authors, status, and optional tags and showcase
 - `deploy.kind: compose`, `pages`, or `none`
-- hostname, production Compose file, public service, and internal port
+- for `compose`, the hostname, production Compose file, public service, and internal port
 - secret names without their values
 
-Run:
+Do not add `repo`; the registry sync sets it from the repository name.
 
-```sh
-python scripts/validate.py
-```
-
-Review the registry output before merging.
+Push the change to `main`. `.github/workflows/registry.yml` dispatches `sync-registry` to
+`platform`, which writes `projects/<slug>.yml`, validates it and merges the registry pull request.
 
 ## 4. Publish images
 

@@ -1,19 +1,27 @@
 # Platform registry
 
-The private `platform` repository is the source of truth. `people/*.yml` drives member pages;
-`projects/*.yml` drives project pages and deployments; `tags/*.json` records immutable image tags.
+The private `platform` repository holds the registry. `people/*.yml` drives member pages.
+`projects/*.yml` drives project pages and deployments; the registry sync writes these files from
+each repository's `.graphite.yml`, and an entry is edited by hand only for a repository without
+one, such as `graphite-hub`. `tags/*.json` records immutable image tags.
 
 ## Project fields
 
+A repository's `.graphite.yml` lists its entries under `projects`, with every field except `repo`.
+
 | Field | Required | Meaning |
 | :--- | :--- | :--- |
-| `slug` | yes | repository name and default hostname prefix |
+| `slug` | yes | repository name for top-level entries; an epic's child has its own |
+| `kind` | yes | `project` or `epic` |
+| `parent` | no | slug of a top-level epic in the same repository |
 | `name` | yes | display name |
 | `summary` | yes | concise present-tense description |
-| `repo` | yes | `project-graphite/<slug>` |
+| `tags` | no | up to six lowercase tags |
+| `repo` | yes | `project-graphite/<repository>`, set by the sync from the declaring repository |
 | `owner` | yes | member responsible for maintenance |
 | `authors` | yes | credited GitHub usernames |
 | `status` | yes | `live`, `wip`, `archived`, or `source-only` |
+| `listed` | no | `false` keeps the entry off the Hub; defaults to `true` |
 | `showcase` | no | problem, approach, outcome, and member contributions |
 | `deploy` | yes | `compose`, `pages`, or `none` contract |
 
@@ -37,6 +45,20 @@ contains names only; values are entered directly in Coolify.
 The Compose file is the runtime source of truth. It pulls prebuilt GHCR images, declares required
 variables, persists state in named volumes, defines service health checks, publishes no host ports,
 and caps CPU and memory for every long-running container.
+
+## Person fields
+
+`people/<handle>.yml` describes one member.
+
+| Field | Required | Meaning |
+| :--- | :--- | :--- |
+| `handle` | yes | lowercase URL segment: `project-graphite.com/members/<handle>` |
+| `github` | yes | GitHub username |
+| `name` | yes | display name |
+| `headline` | no | one line shown under the name |
+| `bio` | no | short biography |
+| `stack` | no | up to eight `group` labels, each with its `items` |
+| `links` | no | up to six `label` and `url` pairs; a URL starts with `https://` or `mailto:` |
 
 ## Validation and rendering
 

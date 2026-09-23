@@ -53,9 +53,10 @@ GitHub username as an author.
 repository cannot read organisation secrets, so its pipeline fails in a way that looks like a bug.
 They can create public ones.
 
-**They cannot push to `platform`.** Contributors have read access. To register a project they open
-an issue with the entry filled in and a maintainer commits it. The registry is small and reviewed;
-that is the point.
+**They cannot push to `platform`.** Contributors have read access. They register a project by
+editing `.graphite.yml` in their own repository; the registry sync validates it, then opens and
+merges the `platform` pull request without maintainer review. Person entries still go through a
+maintainer.
 
 **Rulesets do not protect private repositories on the free plan.** `platform` and
 `project-template` have no branch protection available. What protects them is permissions: nobody

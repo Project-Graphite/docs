@@ -20,8 +20,9 @@ private because it contains deployment topology; it still contains no secrets.
 
 ## Human registry data and deployment tags are separate
 
-People edit `projects/<slug>.yml`; automation edits `tags/<slug>.json`. A deploy cannot conflict with
-a person editing project metadata, and tag history remains a readable rollout record.
+People edit `.graphite.yml` in their repository and the registry sync writes `projects/<slug>.yml`;
+automation edits `tags/<slug>.json`. A deploy cannot conflict with a person editing project
+metadata, and tag history remains a readable rollout record.
 
 ## Production Compose stays with each project
 

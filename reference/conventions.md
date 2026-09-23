@@ -98,7 +98,7 @@ change there affects everyone else. CODEOWNERS routes this automatically.
 | :--- | :--- |
 | Project code | that project |
 | How every project is built or checked | `actions` |
-| What a project is, or how it is deployed | `platform` |
+| What a project is, or how it is deployed | that project's `.graphite.yml`, synced into `platform` |
 | How the site looks | `graphite-hub` |
 | How the organisation works | `docs` |
 

@@ -2,9 +2,9 @@
 
 Retirement has a reversible registry phase and a destructive runtime phase. Do not combine them.
 
-## Hide and stop future deployment records
+## Archive and stop future deployment records
 
-Change the platform entry to:
+Change the project's entry in its repository's `.graphite.yml` to:
 
 ```yaml
 status: archived
@@ -12,7 +12,11 @@ deploy:
   kind: none
 ```
 
-Keep the repository, authors, showcase, and tag history. Validate and merge this change first.
+Push it to `main`; the registry sync rewrites `platform/projects/<slug>.yml`. Edit the platform file
+directly only for a repository without a `.graphite.yml`, such as `graphite-hub`.
+
+Keep the repository, authors, showcase, and tag history. Wait for the registry update to merge
+before continuing.
 
 ## Preserve state
 

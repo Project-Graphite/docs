@@ -14,6 +14,6 @@ runs on Cloudflare Pages; containerized demonstrations run through Coolify on on
 | Retire a project | [operations/retiring-a-project.md](operations/retiring-a-project.md) |
 | Review remaining recommendations | [codex-recs.md](codex-recs.md) |
 
-The private `platform` repository is the source of truth for people, projects, image tags, and
-deployment metadata. Production Compose files live with their applications. Secret values never
-belong in Git.
+The private `platform` repository holds people, image tags, deployment metadata and the project
+registry synced from each repository's `.graphite.yml`. Production Compose files live with their
+applications. Secret values never belong in Git.
