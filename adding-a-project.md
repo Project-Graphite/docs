@@ -73,7 +73,8 @@ Do not reuse one resource URL across unrelated projects. Never commit the URL or
 
 Add the project's public hostname in Cloudflare and attach it only to the public service in Coolify.
 Verify HTTPS, health, persistence, background work, restart behavior, logs, backups, and resource
-usage. Add the live link and concrete outcome to its Hub showcase.
+usage. Set `status: live` so the Hub links to the hostname, and add the concrete outcome to its
+showcase.
 
 ## Checklist
 

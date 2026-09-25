@@ -30,5 +30,5 @@ Deleting a Coolify application can remove containers, environment values, and pe
 Cloudflare hostname changes are separate external mutations. Prepare the exact targets, inspect the
 current application and volumes, and obtain specific approval for each destructive step.
 
-Do not reuse a retired hostname immediately. Keeping the archived registry entry prevents accidental
-reassignment and preserves the Hub history.
+Do not reuse a retired hostname immediately. The archived registry entry preserves the Hub history,
+but with `deploy.kind: none` it no longer claims the hostname.
