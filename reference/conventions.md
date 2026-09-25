@@ -26,8 +26,6 @@ fix/topology-overflow
 chore/bump-vite
 ```
 
-Branch names are not enforced. The PR title is, because that is what ends up in history.
-
 ## Pull request titles
 
 ```
@@ -42,8 +40,7 @@ fix(topology): stop single-service diagrams scaling up
 chore: bump vite to 8.0.16
 ```
 
-Merges are squashed and **the PR title becomes the commit message on `main`**, which is why the
-title is checked rather than the branch name.
+Merges are squashed and **the PR title becomes the commit message on `main`**.
 
 ## Pull request size
 
