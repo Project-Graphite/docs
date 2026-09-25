@@ -4,8 +4,8 @@
 
 Org → People → Invite member. Role **Member**, never Owner.
 
-The organisation base permission is `read`, so a new member can see the organisation and nothing
-more until you grant it.
+The organisation base permission is `read`, so a new member can read every organisation
+repository, including private ones, and write to none until you grant it.
 
 ## 2. Add them to a team
 
@@ -60,4 +60,4 @@ maintainer.
 
 **Rulesets do not protect private repositories on the free plan.** `platform`, `project-template`,
 `graphite-hub` and `docs` have no branch protection available. What protects them is permissions:
-nobody outside `maintainers` has write access.
+nobody outside `maintainers` and the organisation owners has write access.
