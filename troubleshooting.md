@@ -94,8 +94,9 @@ exist.
 **Cause.** Working as intended. A repository cannot deploy until it is registered.
 
 **Fix.** Add an entry with the repository's slug to its `.graphite.yml` and push it to `main`; the
-registry sync writes `projects/<slug>.yml`. Until then builds and checks still run and only the
-record step is blocked, deliberately, so a new repository does not silently do nothing.
+registry sync writes `projects/<slug>.yml`. If the repository's `Registry` workflow fails instead,
+its `Validate .graphite.yml` step lists what to fix. Until then builds and checks still run and only
+the record step is blocked, deliberately, so a new repository does not silently do nothing.
 
 ---
 

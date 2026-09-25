@@ -3,7 +3,9 @@
 The private `platform` repository holds the registry. `people/*.yml` drives member pages.
 `projects/*.yml` drives project pages and deployments; the registry sync writes these files from
 each repository's `.graphite.yml`, and an entry is edited by hand only for a repository without
-one, such as `graphite-hub`. `tags/*.json` records immutable image tags.
+one, such as `graphite-hub`. The sync skips a repository whose manifest fails validation or declares
+a slug registered to another existing repository, leaves that repository's entries unchanged, and
+still syncs the rest. `tags/*.json` records immutable image tags.
 
 ## Project fields
 

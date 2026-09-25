@@ -36,8 +36,10 @@ itself, so replace that entry; its comments describe every field. Declare:
 
 Do not add `repo`; the registry sync sets it from the repository name.
 
-Push the change to `main`. `.github/workflows/registry.yml` dispatches `sync-registry` to
-`platform`, which writes `projects/<slug>.yml`, validates it and merges the registry pull request.
+Push the change to `main`. `.github/workflows/registry.yml` validates the manifest, then
+dispatches `sync-registry` to `platform`, which writes `projects/<slug>.yml` and merges the registry
+pull request. An invalid manifest, such as a top-level slug that is not the repository name, fails
+the workflow with the problems listed and is not dispatched.
 
 ## 4. Publish images
 
