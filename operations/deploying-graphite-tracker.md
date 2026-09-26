@@ -5,8 +5,8 @@ signing in to the server through automatic redeployment on every push to `main`.
 [ovh-coolify.md](ovh-coolify.md) sections 1 to 10 end: the VPS, edge firewall and Coolify are
 already running.
 
-Only the capacity check, the image check and the administrator setup use the VPS terminal. Every
-other step happens in GitHub, Cloudflare or Coolify.
+Only the capacity check, the image check and appointing the system manager use the VPS terminal.
+Every other step happens in GitHub, Cloudflare, Coolify or the application itself.
 
 ## Deployment
 
@@ -239,9 +239,20 @@ curl https://graphite-tracker.project-graphite.com/api/v1/health
 
 The site must return HTTP 200 with a valid certificate.
 
-## 11. Create the administrator
+## 11. Appoint the system manager
 
-The administrator is granted once, operationally; the application has no promotion endpoint.
+Graphite Tracker has three roles:
+
+| Role | Can |
+| :--- | :--- |
+| Member | Everything a reader does |
+| Administrator | Moderate reports and reviews, deactivate members, see private profiles, reviews and hidden entries, and see failed release emails on `/admin` |
+| System manager | Everything an administrator can, plus appoint and remove administrators and turn adult content off for the whole site |
+
+There is at most one system manager, and it can only be appointed from the VPS terminal. The
+application has no page or endpoint that grants or removes that role, so taking it over needs
+server access, not just a stolen session. Administrators are appointed afterwards from the
+application by the system manager.
 
 ### Register and verify
 
@@ -267,25 +278,60 @@ container runs `ghcr.io/project-graphite/graphite-tracker/app`; its PostgreSQL c
 ### Grant the role
 
 ~~~sh
-sudo docker exec -it SERVER_CONTAINER npm run admin:grant --workspace server -- ADMIN_EMAIL
+sudo docker exec -it SERVER_CONTAINER npm run system-manager:grant --workspace server -- MANAGER_EMAIL
 ~~~
 
-The command prints `<handle> is now the administrator`. Its errors mean:
+The command matches the email address case-insensitively and runs in one serializable
+transaction. It prints `<handle> is now the system manager` and signs that account out of every
+session; sign in again to see **Admin** in the account menu and the **Site** tab on `/admin`.
 
-| Error | Cause |
+| Message | Cause |
 | :--- | :--- |
 | `No account uses that email address` | The account is not registered in production, or the address differs |
-| `The account must be verified and active` | The verification link has not been opened |
-| `An administrator already exists` | The one-time grant is already done |
+| `The account must be verified and active` | The verification link has not been opened, or the account is deactivated |
+| `<handle> is already the system manager` | Nothing to do |
+| `<handle> is the system manager; add --transfer to hand the role over` | Another account holds the role |
+
+### Hand the role over
+
+Add `--transfer` to move the role to another verified account. The previous system manager
+becomes a member in the same transaction, and the new one can make them an administrator again.
+
+~~~sh
+sudo docker exec -it SERVER_CONTAINER npm run system-manager:grant --workspace server -- NEW_MANAGER_EMAIL --transfer
+~~~
+
+Use the same command to recover the role when the system manager's account is lost or
+compromised: it does not need the old account.
+
+### Appoint administrators
+
+Signed in as the system manager, open `/admin` → **Users** and select **Make administrator** or
+**Remove administrator** next to an account, then confirm with your own password. Only verified,
+active accounts can be appointed. The change applies on the account's next request; nobody has to
+sign out.
+
+### Turn adult content off for everyone
+
+Signed in as the system manager, open `/admin` → **Site**, switch off **Allow adult content** and
+confirm with your password. This overrides every reader's own setting until it is switched on
+again.
+
+### Upgrading from the single administrator
+
+Before the system manager existed, one administrator was granted with `admin:grant`. The migration
+that introduced roles (`20260927100000_user_roles`) keeps that account an administrator. After the
+first deployment that includes it, run the grant above for the account that should become the
+system manager. `admin:grant` no longer exists.
 
 ### Verify an account without email
 
-Only when email cannot be delivered, mark the administrator's account verified directly. This
-writes one row in the production database. The first administrator was verified this way before
-email delivery existed.
+Only when email cannot be delivered, mark the future system manager's account verified directly.
+This writes one row in the production database. The first administrator was verified this way
+before email delivery existed.
 
 ~~~sh
-sudo docker exec -it POSTGRES_CONTAINER psql -U graphite -d graphite_tracker -c "UPDATE users SET verified_at = now() WHERE email = 'ADMIN_EMAIL' AND verified_at IS NULL RETURNING handle, verified_at;"
+sudo docker exec -it POSTGRES_CONTAINER psql -U graphite -d graphite_tracker -c "UPDATE users SET verified_at = now() WHERE email = 'MANAGER_EMAIL' AND verified_at IS NULL RETURNING handle, verified_at;"
 ~~~
 
 `UPDATE 1` with the handle confirms the change. `UPDATE 0` means no unverified account uses that
@@ -410,7 +456,9 @@ production on the next deployment. Review migrations before merging.
 
 1. Identify the last known-good `sha-...` tag, the first seven characters of its commit.
 2. Check whether a migration prevents running the older image; rolling back the image does not
-   roll back the database.
+   roll back the database. Images built before the roles migration
+   (`20260927100000_user_roles`) read `users.is_admin`, which that migration removes, so they
+   cannot run against a database that has it.
 3. Change Coolify's `IMAGE_TAG` from `latest` to that tag.
 4. Select **Deploy**, not Restart.
 5. Verify health and the public site.
