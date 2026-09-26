@@ -9,11 +9,13 @@ template main push    -> sha-<short> and latest images -> tag record for compose
 Message Lab main push -> tests -> sha-<commit> and main images -> Coolify webhook
                                                                -> tag record when GRAPHITE_DEPLOY_ENABLED is true
 Message Lab Coolify   -> pull main images -> migrate -> health check -> replace containers
+Tracker main push     -> checks -> sha-<short> and latest images -> Coolify webhook
+Tracker Coolify       -> pull latest image -> migrate -> health check -> replace containers
 ```
 
 `reusable-deploy.yml` records tags only when the platform entry declares `kind: compose`. It does
-not access Coolify or the VPS. Message Lab's workflow separately holds a resource-specific Coolify
-webhook and deploy-only token in GitHub Actions secrets.
+not access Coolify or the VPS. Message Lab's and Graphite Tracker's workflows each hold a
+resource-specific Coolify webhook and deploy-only token in GitHub Actions secrets.
 
 Coolify pulls prebuilt images declared by the production Compose file. Direct Coolify Auto Deploy
 stays disabled so a repository push cannot race the image build. The workflow calls the webhook

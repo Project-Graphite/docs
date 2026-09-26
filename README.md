@@ -10,6 +10,7 @@ runs on Cloudflare Pages; containerized demonstrations run through Coolify on on
 | Understand registry fields | [reference/registry.md](reference/registry.md) |
 | Understand hosting | [reference/hosting.md](reference/hosting.md) |
 | Prepare the OVH host | [operations/ovh-coolify.md](operations/ovh-coolify.md) |
+| Deploy Graphite Tracker | [operations/deploying-graphite-tracker.md](operations/deploying-graphite-tracker.md) |
 | Add a member | [operations/adding-a-person.md](operations/adding-a-person.md) |
 | Retire a project | [operations/retiring-a-project.md](operations/retiring-a-project.md) |
 | Review remaining recommendations | [recommendations.md](recommendations.md) |

@@ -23,6 +23,7 @@ application shares one Docker host. Do not place untrusted workloads on it.
 | Runtime | Docker Compose managed by self-hosted Coolify |
 | Coolify dashboard | `https://coolify.project-graphite.com` |
 | Test application | `https://message-lab.project-graphite.com` |
+| Graphite Tracker | `https://graphite-tracker.project-graphite.com`, see [deploying-graphite-tracker.md](deploying-graphite-tracker.md) |
 
 The accepted USD 5.35 checkout was a billing decision made by Amr. Before renewing, resizing, or
 adding an OVH option, verify the current invoice currency, tax, term, and renewal price. Never infer
