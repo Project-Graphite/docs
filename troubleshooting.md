@@ -7,21 +7,49 @@ fix. Most of them present with an error pointing somewhere other than the proble
 
 ## A container is repeatedly restarting or reports OOMKilled
 
-Inspect its Coolify logs and the read-only output of `sudo docker stats --no-stream` and
-`free -h`. Stop an unused demonstration before considering a resize. Do not raise a service limit or
+Inspect `sudo docker compose -p <slug> logs --tail 100 <service>`, `sudo docker stats --no-stream`
+and `free -h`. Stop an unused demonstration before considering a resize. Do not raise a service limit or
 resize the VPS without actual usage evidence, the exact recurring price, and approval.
 
 ## A container reports an image pull error
 
 Confirm the image name and tag exist in GHCR and that the package is publicly readable. If a package
-must remain private, add a narrowly scoped registry credential in Coolify; do not put a GitHub token
-in a Compose file.
+must remain private, it cannot run here yet: the VPS pulls anonymously. Never put a GitHub token in
+the values.
 
 ## A project is healthy internally but the hostname fails
 
-Verify the container health check and Coolify service domain first, then the Coolify proxy, then the
-public hostname in Cloudflare. The domain value must include the service's internal port, such as
-`:8000`, when the application does not listen on port 80.
+Check, in order: the route file `/srv/graphite/edge/routes/<slug>.yml` exists and names the public
+service's `port`; `sudo docker logs edge-traefik-1` shows no route error; the hostname is a proxied
+CNAME to the tunnel in Cloudflare; the tunnel is healthy in Zero Trust → Networks → Tunnels.
+Rerunning **Deploy** for the project rewrites the route and the DNS record.
+
+## Deploy fails with "waiting on secrets"
+
+**Cause.** A name in the project's `secrets:` is missing from `/srv/graphite/<slug>/secrets.env`.
+
+**Fix.** An owner adds it to `secrets/<slug>.env` and pushes; **Apply** writes it, then rerun
+**Deploy** for the project.
+
+## Deploy fails with "core x.y.z is not released"
+
+**Cause.** The values pin a chart version that has no `core-v<version>` tag yet.
+
+**Fix.** Merge the chart change to `main` first; **Deploy** tags the version on its first push.
+
+## A static site deploy says the Pages project is connected to Git
+
+**Cause.** A Git-integrated Cloudflare Pages project already uses the slug.
+
+**Fix.** Delete it in Cloudflare → Workers & Pages and rerun **Deploy** for the site, which creates a
+direct-upload project with the same name.
+
+## A sleeping project keeps waking
+
+Something keeps requesting it. Bots and monitors whose user agent says so are ignored.
+`sudo docker logs edge-sablier-1` shows when sessions start; to see the caller, add `accessLog: {}`
+to `platform/edge/traefik.yml` for a while, then add its user agent pattern to `ignoreUserAgent` in
+the core chart's route template.
 
 ## A workflow run fails with no jobs and no log
 
@@ -195,13 +223,13 @@ deep links are real files and unknown paths genuinely miss.
 
 ---
 
-## Cloudflare Pages build fails with "no package.json"
+## A static site build fails with "no package.json"
 
-**Cause.** **Root directory** was not set. It is not part of any framework preset, and presets
-assume the repository root.
+**Cause.** `deploy.source.directory` in the project's `.graphite.yml` does not name the folder that
+holds `package.json`.
 
-**Fix.** Set it to the folder containing `package.json` — `site` for Graphite Hub. The build
-output directory is relative to it, so it stays `dist`, not `site/dist`.
+**Fix.** Set it to that folder — `site` for Graphite Hub. `output` is relative to it, so it stays
+`dist`, not `site/dist`.
 
 ---
 

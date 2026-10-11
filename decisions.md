@@ -26,17 +26,38 @@ People edit `.graphite.yml` in their repository and the registry sync writes `pr
 automation edits `tags/<slug>.json`. A deploy cannot conflict with a person editing project
 metadata, and tag history remains a readable rollout record.
 
-## Production Compose stays with each project
+## Production is a values file in platform
 
-Each application owns a versioned `compose.production.yaml`. It pulls images built by GitHub
-Actions, declares persistent storage and health checks, and caps CPU and memory. The platform
-registry records the Compose source, hostname, public service, port, and secret names.
+Each project's production lives in `platform/deploy/<slug>/values.yaml`, written by contributors
+through reviewed pull requests, and the shared `core` chart renders it. Every project gets the same
+hardening, and a change to how all projects run is one chart release. Project repositories keep
+their code, Dockerfiles and local `compose.yaml`.
 
-## Coolify is the shared application control plane
+## Platform deploys everything; Coolify is retired
 
-Coolify manages Git sources, deployments, HTTPS routing, environment values, health, and logs on
-one OVH VPS. Projects receive separate Compose networks and volumes, but still share a Docker daemon
-and kernel. Only trusted organisation projects belong on this host.
+The platform **Deploy** workflow renders values with Helm into a Docker Compose project and applies
+it over SSH through Cloudflare Access, and builds static sites into Cloudflare Pages. Git holds the
+whole desired state, a deploy is a merge, and a rollback is a pinned tag. Coolify kept a second copy
+of that state in its own database and UI. Helm renders Compose today so the same values can move to
+a k3s cluster later; see [plans/k3s-transition.md](plans/k3s-transition.md).
+
+## Secrets are owners-only
+
+Secret values are SOPS-encrypted in the private `secrets` repository, which only organisation
+owners can see, and its **Apply** workflow writes them to the VPS. Anyone can write values; only an
+owner can supply what they reference. Owners are the deliberate bottleneck, the way an operations
+team owns a parameter store.
+
+## Traffic arrives through a tunnel
+
+Cloudflare Tunnel carries every hostname to Traefik on the VPS, so no web port is open, TLS is
+Cloudflare's, and deploy SSH goes through Cloudflare Access instead of a public port.
+
+## Idle demonstrations sleep
+
+A project can sleep: Sablier stops it after a period without requests and starts it on the next
+one. This keeps occasional demos from holding memory on a small host. Projects with scheduled work
+stay awake or set a scheduled wake.
 
 ## Static work stays off the VPS
 
@@ -45,19 +66,15 @@ service images. This reserves the 4 GB VPS for APIs, SSR processes, workers, Pos
 
 ## Every long-running container has a resource ceiling
 
-Production Compose files define CPU and memory limits. Limits prevent one idle demonstration from
+Every service in a project's values sets a memory limit and reserve, and **PR** checks the reserves fit the VPS budget. Limits prevent one idle demonstration from
 consuming the entire portfolio server; actual server memory, swap, disk, and OOM events remain the
 capacity signals.
 
 ## Application deployment follows successful CI
 
-Graphite Message Lab's CI publishes immutable SHA images and moving `main` images only after its
-tests pass; the shared template runs checks on pull requests and, on every push to `main`,
-publishes `sha-<short>` and `latest` images for the changed services. Each automated application
-uses a resource-specific Coolify webhook and a deploy-only API token stored as GitHub Actions
-secrets. Coolify's direct Auto Deploy remains disabled, preventing a repository event from racing
-the image build. Manual Deploy remains the path for first deployment, configuration changes, and
-rollback.
+A project's CI publishes `sha-<short>` images only after its checks pass, then records the tag in
+`platform`. The deploy runs from that record, so it always runs exactly the image CI built, and
+values can pin an older tag to roll back.
 
 ## Graphite Hub is prerendered
 

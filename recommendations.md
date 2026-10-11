@@ -1,44 +1,32 @@
 # Project Graphite recommendations
 
-## Implemented in the OVH and Coolify preparation
+## In place
 
-- Replaced the GKE-specific registry and renderer with a small Docker Compose contract for Coolify.
-- Added a production Message Lab stack that pulls prebuilt GHCR images, persists PostgreSQL and
-  Redis, runs migrations, checks health, and caps every service's CPU and memory.
-- Kept Graphite Hub and static projects on Cloudflare Pages to preserve VPS capacity.
-- Kept secret values outside Git and limited the private registry to their names.
-- Added a user-run OVH and Coolify procedure with checkout, security, DNS, deployment, backup,
-  rollback, and capacity gates.
-- Updated shared workflows and the project template so recording an image release never deploys or
-  receives VPS credentials.
-- Deployed Graphite Message Lab through prebuilt GHCR images and configured an authenticated,
-  deploy-only Coolify webhook after the test and image jobs.
-- Restricted public host access to SSH, HTTP, and HTTPS; removed direct Coolify dashboard and
-  real-time port exposure.
-- Enabled Coolify two-factor authentication, closed registration, scheduled instance backup,
-  scheduled updates, and non-destructive Docker cleanup.
+- The platform deploy path: Helm-rendered Compose for containers and direct upload for static
+  sites, with values reviewed by pull request and a pinned image tag per deploy. Projects move onto
+  it one by one with [operations/migrating-from-coolify.md](operations/migrating-from-coolify.md).
+- Secret values moved to the owners-only, SOPS-encrypted `secrets` repository.
+- Traffic arrives through a Cloudflare Tunnel; deploy SSH goes through Cloudflare Access.
+- Idle demonstrations can sleep and wake on request; Message Lab does.
+- A memory budget in `platform/deploy/host.yaml` is checked on every pull request.
+- Strata backs up its database and files nightly.
 
 ## Next
 
-1. Prove restoration before treating persistent projects as production. Schedule encrypted database
-   exports to separately controlled object storage only after the storage cost and credentials are
-   approved.
-2. Add basic availability and certificate checks from outside the VPS. Alerting should avoid
-   expensive log ingestion on the starter budget.
-3. Add a Hub deployment-status view sourced from non-sensitive platform metadata: immutable image
-   tag, last successful rollout, health state, and project link.
-4. Exercise Message Lab rollback and restore, then record the measured recovery result.
-5. Publish an owner-facing incident-triage and spending-anomaly procedure before onboarding
-   member-owned stateful services.
-6. Review capacity against [operations/ovh-coolify.md §19](operations/ovh-coolify.md#19-capacity-and-billing-boundaries)
-   before adding another project.
+1. Finish [operations/migrating-from-coolify.md](operations/migrating-from-coolify.md), then
+   measure `docker stats` and set each service's `reserve` to its real use.
+2. Back up Graphite Tracker, Message Lab and PixelPocket like Strata, and copy backups off the VPS
+   once off-site storage and its cost are approved. Test a restore of each.
+3. Add availability and certificate checks from outside the VPS, with a user agent the sleep filter
+   ignores.
+4. Add a Hub deployment-status view from `tags/` and the values: image tag, last rollout, health.
+5. Give the Graphite Tracker its scheduled wake (`sleep.wake`) if it should sleep: its release
+   alerts and digests only run while it is awake.
+6. Plan the move in [plans/k3s-transition.md](plans/k3s-transition.md) when the VPS grows.
 
 ## Deliberately deferred
 
-- High availability, a second server, load balancer, and managed PostgreSQL exceed the current
-  portfolio goal or cost ceiling.
-- Kubernetes, service meshes, GitOps suites, and separate hosts per member are unnecessary at this
-  scale.
-- Preview environments for stateful projects should wait until cleanup automation and cost controls
-  are proven.
+- High availability, a second server, a load balancer and managed databases exceed the current
+  portfolio goal and budget.
+- Preview environments for stateful projects should wait until cleanup and cost controls exist.
 - Untrusted third-party workloads do not belong on this shared Docker host.
