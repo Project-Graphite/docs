@@ -77,12 +77,12 @@ all**. No visibility setting changes this; it is a plan limit.
 **Fix.** Set them as repository secrets on the private repository:
 
 ```sh
-gh secret set PLATFORM_APP_CLIENT_ID --repo project-graphite/platform --body "<Client ID from the Graphite Deploy app's General settings>"
-gh secret set PLATFORM_APP_PRIVATE_KEY --repo project-graphite/platform < key.pem
+gh secret set PLATFORM_APP_CLIENT_ID --repo project-graphite/<repository> --body "<Client ID from the Graphite Deploy app's General settings>"
+gh secret set PLATFORM_APP_PRIVATE_KEY --repo project-graphite/<repository> < key.pem
 ```
 
-Public repositories pick up organisation secrets automatically, which is why project repositories
-are public and members cannot create private ones.
+Public repositories pick up organisation secrets automatically, which is why every repository
+except `traceboard` is public and members cannot create private ones.
 
 ---
 

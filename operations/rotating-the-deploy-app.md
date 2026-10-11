@@ -20,14 +20,9 @@ The App ID is not secret — it is public installation metadata. The private key
 
 ## Where the credentials live
 
-| Location | Why |
-| :--- | :--- |
-| Org secrets | reach **public** repositories only, on the free plan |
-| `platform` repo secrets | `platform` is private, so org secrets cannot reach it |
-| `project-template` repo secrets | same reason |
-
-Public project repositories inherit the org secrets automatically and need no setup. Private ones
-need their own copy — which is one reason members cannot create private repositories.
+`PLATFORM_APP_CLIENT_ID` and `PLATFORM_APP_PRIVATE_KEY` are organisation secrets only. Every
+public repository, including all platform repositories, inherits them. On the free plan they do not
+reach private repositories, which is one reason members cannot create private ones.
 
 ## Rotating
 
@@ -35,14 +30,12 @@ need their own copy — which is one reason members cannot create private reposi
 Private keys → Generate a private key. A `.pem` downloads. Both keys are valid at once, so nothing
 breaks yet.
 
-**2. Update every location.**
+**2. Update the organisation secret.**
 
 ```sh
 KEY=~/Downloads/graphite-deploy.<date>.private-key.pem
 
 gh secret set PLATFORM_APP_PRIVATE_KEY --org project-graphite --visibility all < "$KEY"
-gh secret set PLATFORM_APP_PRIVATE_KEY --repo project-graphite/platform < "$KEY"
-gh secret set PLATFORM_APP_PRIVATE_KEY --repo project-graphite/project-template < "$KEY"
 ```
 
 Read the key **from the file**. Pasting it into a terminal puts it in your shell history and risks
@@ -61,7 +54,7 @@ the key to leak from.
 ## If the key leaks
 
 1. Delete the key on the app page immediately. Every token minted from it stops working.
-2. Generate a new one and update all three locations.
+2. Generate a new one and update the organisation secret.
 3. Check commit and pull-request history in every organisation repository for anything the leak
    period allows.
 
