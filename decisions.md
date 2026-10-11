@@ -66,9 +66,9 @@ service images. This reserves the 4 GB VPS for APIs, SSR processes, workers, Pos
 
 ## Every long-running container has a resource ceiling
 
-Every service in a project's values sets a memory limit and reserve, and **PR** checks the reserves fit the VPS budget. Limits prevent one idle demonstration from
-consuming the entire portfolio server; actual server memory, swap, disk, and OOM events remain the
-capacity signals.
+Every service in a project's values sets a memory limit and reserve, and **PR** checks that the
+reserves fit the VPS budget. Limits keep one idle demonstration from consuming the server; actual
+memory, swap, disk and OOM events remain the capacity signals.
 
 ## Application deployment follows successful CI
 
