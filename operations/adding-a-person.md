@@ -24,22 +24,19 @@ person directly, or a small team if several people share one project.
 
 They get **write on their own project only**. Read everywhere else.
 
-## 4. Create their registry entry
+## 4. Their registry entry is created for them
 
-`platform/people/<handle>.yml` — see [../reference/registry.md](../reference/registry.md).
+The next registry sync creates `platform/people/<lowercase-login>.yml` with `profile: github` and
+fills `name`, `headline` and `links` from their GitHub profile. It refreshes them on every later
+sync. The sync runs on any `.graphite.yml` push in the organisation, or by hand from
+`platform` → Actions → **Sync registry**.
 
-The handle claims `project-graphite.com/members/<handle>` permanently, so agree it with them first.
+To write their profile by hand instead, they set `profile: manual` and edit the file: fork
+`platform`, change only `people/<handle>.yml`, and open a pull request for a maintainer to merge.
+`bio` and `stack` are always written by hand. See [../reference/registry.md](../reference/registry.md).
 
-```sh
-cd platform
-python scripts/validate.py
-git switch -c feat/add-<handle>
-git add people/<handle>.yml
-git commit -m "feat: add <name>"
-```
-
-On merge their page goes live. It includes projects they maintain and projects that credit their
-GitHub username as an author.
+Their page includes projects they maintain and projects that credit their GitHub username as an
+author.
 
 ## 5. Point them at the documentation
 
@@ -53,10 +50,10 @@ GitHub username as an author.
 repository cannot read organisation secrets, so its pipeline fails in a way that looks like a bug.
 They can create public ones.
 
-**They cannot push to `platform`.** Contributors have read access. They register a project by
-editing `.graphite.yml` in their own repository; the registry sync validates it, then opens and
-merges the `platform` pull request without maintainer review. Person entries still go through a
-maintainer.
+**They cannot push to `platform`.** Contributors have read access and open pull requests from a
+private fork. They register a project by editing `.graphite.yml` in their own repository; the
+registry sync validates it, then opens and merges the `platform` pull request without maintainer
+review. Hand-written person entries go through a maintainer.
 
 **Rulesets do not protect private repositories on the free plan.** `platform`, `project-template`,
 `graphite-hub` and `docs` have no branch protection available. What protects them is permissions:

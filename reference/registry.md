@@ -58,6 +58,7 @@ and caps CPU and memory for every long-running container.
 | :--- | :--- | :--- |
 | `handle` | yes | lowercase URL segment: `project-graphite.com/members/<handle>` |
 | `github` | yes | GitHub username |
+| `profile` | no | `github` (default): the sync fills `name`, `headline` and `links` from the GitHub profile; `manual`: the file is used as written |
 | `name` | yes | display name |
 | `headline` | no | one line shown under the name |
 | `bio` | no | short biography |

@@ -3,11 +3,17 @@
 The public `actions` repository contains reusable GitHub Actions workflows. Projects call them at
 `@main`; a repository that must hold back pins a commit SHA at the call site.
 
+`reusable-pipeline.yml` chains detect, checks, images, deploy, changelog, gitleaks and PR
+conventions behind boolean switches (`all`, `checks`, `deploy`, `changelog`, `secrets-scan`,
+`conventions`; all `true` except `all`). The template's `pipeline.yml` calls it for pushes to `main`
+and pull requests. Using it is optional: a repository can call the individual workflows instead.
+
 ```text
 template pull request -> checks and image build without push
 project main push     -> checks -> sha-<short> and latest images -> Deploy
 Deploy                -> Coolify webhook when COOLIFY_WEBHOOK is set -> tag record in platform/tags
 Coolify               -> pull latest images -> migrate -> health check -> replace containers
+project main push     -> Changelog -> next version tag -> releases/<slug>/<version>.yml in graphite-hub
 ```
 
 `reusable-deploy.yml` acts only when the platform entry declares `kind: compose`. It sends the
