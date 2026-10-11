@@ -1,6 +1,6 @@
 # Platform registry
 
-The private `platform` repository holds the registry. `people/*.yml` drives member pages.
+The `platform` repository holds the registry. `people/*.yml` drives member pages.
 `projects/*.yml` drives project pages and deployments; the registry sync writes these files from
 each repository's `.graphite.yml`, and an entry is edited by hand only for a repository without
 one, such as `graphite-hub`. The sync skips a repository whose manifest fails validation or declares

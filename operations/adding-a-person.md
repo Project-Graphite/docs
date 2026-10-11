@@ -11,7 +11,7 @@ repository, including private ones, and write to none until you grant it.
 
 | Team | Gives | Use for |
 | :--- | :--- | :--- |
-| `contributors` | read on `actions`, `project-template`, `platform`, `docs` | everyone |
+| `contributors` | write through pull requests on `actions`, `platform`, `project-template`, `docs`, `.github`, `graphite-hub` | everyone |
 | `maintainers` | admin on `actions`, `platform`, `project-template`, `.github`, `graphite-hub`, `docs` | people who own the platform with you |
 
 Add nearly everyone to `contributors`. `maintainers` is for someone you would trust to change how
@@ -31,8 +31,9 @@ fills `name`, `headline` and `links` from their GitHub profile. It refreshes the
 sync. The sync runs on any `.graphite.yml` push in the organisation, or by hand from
 `platform` → Actions → **Sync registry**.
 
-To write their profile by hand instead, they set `profile: manual` and edit the file: fork
-`platform`, change only `people/<handle>.yml`, and open a pull request for a maintainer to merge.
+To write their profile by hand instead, they set `profile: manual` and edit the file on a
+branch of `platform`, changing only `people/<handle>.yml`, then open a pull request for a
+maintainer to approve.
 `bio` and `stack` are always written by hand. See [../reference/registry.md](../reference/registry.md).
 
 Their page includes projects they maintain and projects that credit their GitHub username as an
@@ -50,11 +51,11 @@ author.
 repository cannot read organisation secrets, so its pipeline fails in a way that looks like a bug.
 They can create public ones.
 
-**They cannot push to `platform`.** Contributors have read access and open pull requests from a
-private fork. They register a project by editing `.graphite.yml` in their own repository; the
+**They cannot push to `main` on the platform repositories.** Contributors push branches and open
+pull requests. They register a project by editing `.graphite.yml` in their own repository; the
 registry sync validates it, then opens and merges the `platform` pull request without maintainer
-review. Hand-written person entries go through a maintainer.
+review. Hand-written person entries go through a reviewed pull request.
 
-**Rulesets do not protect private repositories on the free plan.** `platform`, `project-template`,
-`graphite-hub` and `docs` have no branch protection available. What protects them is permissions:
-nobody outside `maintainers` and the organisation owners has write access.
+**`main` rulesets.** Each platform repository blocks deletion and force-pushes on `main` and
+requires a squash-merged pull request with one approval. Organisation admins and the
+`graphite-deploy` app bypass it, so the registry sync, tag records and changelog keep pushing.

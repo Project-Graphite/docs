@@ -12,11 +12,13 @@ registry, and CI publishes a matching immutable image for each one.
 Subdomains isolate browser cookies, storage, and service workers. Hostnames stay one level below the
 apex so Cloudflare's standard certificate coverage is sufficient.
 
-## Public project code, private control plane
+## Public code, including the control plane
 
-Project repositories and reusable actions are public. This supports the portfolio, avoids private
-Actions-minute limits, and allows public repositories to call shared workflows. `platform` remains
-private because it contains deployment topology; it still contains no secrets.
+Project repositories and the platform repositories (`platform`, `actions`, `project-template`,
+`docs`, `.github`, `graphite-hub`) are public. This supports the portfolio, avoids private
+Actions-minute limits, lets organisation secrets reach every repository on the free plan, and makes
+`main` rulesets available, so contributors work through reviewed pull requests. `platform` holds
+deployment topology but no secrets.
 
 ## Human registry data and deployment tags are separate
 
@@ -27,8 +29,8 @@ metadata, and tag history remains a readable rollout record.
 ## Production Compose stays with each project
 
 Each application owns a versioned `compose.production.yaml`. It pulls images built by GitHub
-Actions, declares persistent storage and health checks, and caps CPU and memory. The private
-platform registry records the Compose source, hostname, public service, port, and secret names.
+Actions, declares persistent storage and health checks, and caps CPU and memory. The platform
+registry records the Compose source, hostname, public service, port, and secret names.
 
 ## Coolify is the shared application control plane
 
