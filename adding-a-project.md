@@ -10,11 +10,10 @@ my-project/
 ├── api/Dockerfile
 ├── worker/Dockerfile
 ├── compose.yaml
-├── compose.override.yaml
 └── compose.production.yaml
 ```
 
-`compose.yaml` and `compose.override.yaml` are for local development. `compose.production.yaml`
+`compose.yaml` is for local development. `compose.production.yaml`
 defines the Coolify runtime and must pull prebuilt GHCR images rather than build on the VPS.
 
 ## 2. Make the application operable
