@@ -24,6 +24,9 @@ application shares one Docker host. Do not place untrusted workloads on it.
 | Coolify dashboard | `https://coolify.project-graphite.com` |
 | Test application | `https://message-lab.project-graphite.com` |
 | Graphite Tracker | `https://graphite-tracker.project-graphite.com`, see [deploying-graphite-tracker.md](deploying-graphite-tracker.md) |
+| Strata | `https://strata.project-graphite.com` |
+| PixelPocket | `https://pixelpocket.project-graphite.com` |
+| Declared memory limits | Message Lab 1,536 MiB, Graphite Tracker 992 MiB, Strata 1,024 MiB, PixelPocket 1,216 MiB: 4,768 MiB in total, above the 3.7 GiB visible, so the limits rely on apps staying well under their ceilings |
 
 The accepted USD 5.35 checkout was a billing decision made by Amr. Before renewing, resizing, or
 adding an OVH option, verify the current invoice currency, tax, term, and renewal price. Never infer
@@ -262,19 +265,19 @@ Message Lab builds in GitHub Actions so the VPS does not compile application ima
 publishes:
 
 ~~~text
-ghcr.io/project-graphite/graphite-message-lab/web:sha-<commit>
-ghcr.io/project-graphite/graphite-message-lab/worker:sha-<commit>
-ghcr.io/project-graphite/graphite-message-lab/web:main
-ghcr.io/project-graphite/graphite-message-lab/worker:main
+ghcr.io/project-graphite/graphite-message-lab/web:sha-<short>
+ghcr.io/project-graphite/graphite-message-lab/worker:sha-<short>
+ghcr.io/project-graphite/graphite-message-lab/web:latest
+ghcr.io/project-graphite/graphite-message-lab/worker:latest
 ~~~
 
-SHA tags are immutable rollback points. The `main` tags move only after tests pass.
+SHA tags are immutable rollback points. The `latest` tags move only after tests pass.
 
 Both Message Lab packages are public so Coolify can pull them without a GitHub package token:
 
 ~~~sh
-sudo docker manifest inspect ghcr.io/project-graphite/graphite-message-lab/web:main
-sudo docker manifest inspect ghcr.io/project-graphite/graphite-message-lab/worker:main
+sudo docker manifest inspect ghcr.io/project-graphite/graphite-message-lab/web:latest
+sudo docker manifest inspect ghcr.io/project-graphite/graphite-message-lab/worker:latest
 ~~~
 
 Private projects should use a narrowly scoped registry credential instead.
@@ -389,15 +392,14 @@ For each push to `main`, `.github/workflows/main.yml`:
 1. runs the application test suite;
 2. stops if tests fail;
 3. builds the web and worker image;
-4. publishes immutable `sha-<commit>` tags;
-5. updates both `main` tags;
-6. then, in parallel, sends the authenticated `POST` to the Coolify webhook and, when the
-   `GRAPHITE_DEPLOY_ENABLED` repository variable is `true`, records the SHA tag in
-   `platform/tags/graphite-message-lab.json`.
+4. publishes immutable `sha-<short>` tags;
+5. updates both `latest` tags;
+6. then calls the shared `reusable-deploy.yml`, which sends the authenticated `POST` to the Coolify
+   webhook and records the SHA tag in `platform/tags/graphite-message-lab.json`.
 
 Use `POST`; this installation returned HTTP 405 for `GET`.
 
-Coolify then reads the current Compose source, pulls the new `main` images, runs the web startup
+Coolify then reads the current Compose source, pulls the new `latest` images, runs the web startup
 migration, waits for health, and replaces the containers. A successful webhook response only means
 the deployment was queued; confirm completion under **Deployments**.
 

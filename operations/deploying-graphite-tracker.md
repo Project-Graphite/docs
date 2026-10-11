@@ -158,8 +158,7 @@ Under **Environment Variables**, set:
 | `EMAIL_HOST_PASSWORD` | Gmail app password without spaces | yes, for Gmail |
 | `DEFAULT_FROM_EMAIL` | `Graphite Tracker <projectgraphite.org@gmail.com>` | yes |
 
-`IMAGE_TAG` is `latest`, not `main` as for Message Lab, because the shared build workflow tags
-`latest`. Compose refuses to start without `POSTGRES_PASSWORD`, `AUTH_ACCESS_TOKEN_SECRET`,
+`IMAGE_TAG` is `latest`, because the shared build workflow tags `latest`. Compose refuses to start without `POSTGRES_PASSWORD`, `AUTH_ACCESS_TOKEN_SECRET`,
 `EMAIL_HOST` and `DEFAULT_FROM_EMAIL`; a deployment attempted before they exist fails and the
 running version stays up. An empty source credential only turns that connector off. On any port
 other than `465`, a configured `EMAIL_HOST_USER` requires the server to upgrade the connection with
@@ -394,22 +393,18 @@ In `.github/workflows/main.yml`, add after the `images` job:
 
 ~~~yaml
   deploy:
-    name: Deploy to Coolify
-    needs: images
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger deployment
-        env:
-          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
-          COOLIFY_WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK }}
-        run: |
-          curl --fail --show-error --silent --request POST "$COOLIFY_WEBHOOK" \
-            --header "Authorization: Bearer $COOLIFY_TOKEN"
+    name: Deploy
+    needs: [services, images]
+    uses: project-graphite/actions/.github/workflows/reusable-deploy.yml@main
+    with:
+      services: ${{ needs.services.outputs.services }}
+      tag: ${{ needs.images.outputs.tag }}
+    secrets: inherit
 ~~~
 
-`needs: images` means nothing deploys unless the checks pass and the image is published. The
-request must be `POST`; this Coolify installation returns HTTP 405 for `GET`. `--fail` turns the
-job red when Coolify rejects the call.
+`needs: images` means nothing deploys unless the checks pass and the image is published. The shared
+workflow sends the `POST` (this Coolify installation returns HTTP 405 for `GET`), turns the job red
+when Coolify rejects the call, and records the tag in `platform/tags/graphite-tracker.json`.
 
 ### Register the deployment
 
@@ -425,9 +420,9 @@ In the same commit, set the `deploy` block in `.graphite.yml`:
         port: 3000
 ~~~
 
-This records the deployment in the platform registry; Coolify does not read it. The tracker has no
-`registry.yml` workflow, so the platform's daily **Sync registry** run at 05:17 UTC picks up the
-change, or it can be run manually from the `platform` repository's **Actions** tab. `listed`
+This records the deployment in the platform registry; Coolify does not read it. The push runs the
+tracker's `registry.yml` workflow, which validates the manifest and asks the platform to sync it.
+`listed`
 decides whether the project appears on the Hub, and the Hub links to the live site only when
 `status` is `live`.
 
@@ -435,7 +430,7 @@ decides whether the project appears on the Hub, and the Hub links to the live si
 
 The push that adds the Deploy job is also its first test:
 
-1. In GitHub **Actions**, the **Main** run must pass Checks, Images and **Deploy to Coolify**. A
+1. In GitHub **Actions**, the **Main** run must pass Checks, Images and **Deploy**. A
    green Deploy job only means Coolify queued the deployment.
 2. In Coolify, the application's **Deployments** list must show a new deployment within seconds.
    Wait for it to finish and for the services to become healthy.

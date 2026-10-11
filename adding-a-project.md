@@ -67,7 +67,8 @@ After the first manual deployment succeeds:
 3. create a finite-lived API token with only `deploy` permission;
 4. copy the application's authenticated resource webhook;
 5. store it as `COOLIFY_WEBHOOK` and the token as `COOLIFY_TOKEN` in repository Actions secrets;
-6. call the webhook with `POST` only after tests and image publication succeed.
+6. nothing else: the template's `Deploy` job (`reusable-deploy.yml`) calls the webhook with `POST`
+   after tests and image publication succeed, and skips the call while `COOLIFY_WEBHOOK` is unset.
 
 Do not reuse one resource URL across unrelated projects. Never commit the URL or token.
 

@@ -240,8 +240,9 @@ lowercase anyway.
 **Cause.** The build context is the service folder, not the repository root. `server/Dockerfile`
 cannot copy from `../shared`.
 
-**Fix.** Either vendor what is shared into the service, or publish it as a package. If two services
-genuinely need the same code, that is a signal it belongs in a package rather than a folder.
+**Fix.** Add `<service>/.build-contexts` with a `name=./path` line, then `COPY --from=name` in the
+Dockerfile, and set the same `additional_contexts` in `compose.yaml`. CI passes the context to the
+build and rebuilds the service when that path changes.
 
 ---
 

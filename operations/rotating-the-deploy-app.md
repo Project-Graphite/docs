@@ -25,6 +25,7 @@ The App ID is not secret — it is public installation metadata. The private key
 | Org secrets | reach **public** repositories only, on the free plan |
 | `platform` repo secrets | `platform` is private, so org secrets cannot reach it |
 | `project-template` repo secrets | same reason |
+| `graphite-hub` repo secrets | same reason; its release sync mints tokens with them |
 
 Public project repositories inherit the org secrets automatically and need no setup. Private ones
 need their own copy — which is one reason members cannot create private repositories.
@@ -61,7 +62,7 @@ the key to leak from.
 ## If the key leaks
 
 1. Delete the key on the app page immediately. Every token minted from it stops working.
-2. Generate a new one and update all three locations.
+2. Generate a new one and update all four locations.
 3. Check commit and pull-request history in every organisation repository for anything the leak
    period allows.
 
