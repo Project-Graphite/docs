@@ -100,7 +100,7 @@ merge. Registry-sync pull requests on `platform` merge automatically once valida
 | Project code | that project |
 | How every project is built or checked | `actions` |
 | What a project is | that project's `.graphite.yml`, synced into `platform` |
-| How it is deployed, its production values | `platform/deploy/<slug>/values.yaml`, by pull request |
+| How it is deployed, its production values | `platform/deploy/<slug>/core.yaml` and `values.yaml`, by pull request |
 | Its secret values | the owners-only `secrets` repository, added by an owner |
 | How the site looks | `graphite-hub` |
 | How the organisation works | `docs` |

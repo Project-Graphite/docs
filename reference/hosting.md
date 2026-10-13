@@ -3,7 +3,7 @@
 | Deployment kind | Runtime | Deployed by |
 | :--- | :--- | :--- |
 | `pages` | Cloudflare Pages, direct upload | platform **Deploy** builds the recorded commit |
-| `compose` | Docker Compose on the OVH VPS | platform **Deploy** renders `deploy/<slug>/values.yaml` |
+| `compose` | Docker Compose on the OVH VPS | platform **Deploy** renders `deploy/<slug>/core.yaml` and `values.yaml` |
 | `none` | nothing | — |
 
 ## Hostnames

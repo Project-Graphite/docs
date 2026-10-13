@@ -40,17 +40,42 @@ public once, in the organisation's package settings.
 
 ## 5. Write its values
 
-Open a pull request in `platform` adding `deploy/<slug>/values.yaml`. The fields are in the
-[platform README](https://github.com/project-graphite/platform#values); `deploy/strata/values.yaml`
-is a full example. **PR** renders it, checks it with Docker Compose, flags `${NAME}` references
-missing from `secrets`, and checks the memory budget.
+Open a pull request in `platform` adding `deploy/<slug>/core.yaml`, what runs, and
+`deploy/<slug>/values.yaml`, its settings. The smallest project is:
+
+```yaml
+# core.yaml
+services:
+  app:
+    image: ghcr.io/project-graphite/<repo>/app
+    port: 3000
+    health: /health
+```
+
+```yaml
+# values.yaml
+app:
+  memory: 256M
+  env:
+    APP_URL: https://<slug>.project-graphite.com
+  secrets: [API_KEY]
+```
+
+Add `postgres: {}`, `redis: {}` or `backup: {}` to `core.yaml` for a database, a cache or daily
+backups; every service then gets the connection settings. Every option and default is in
+`platform/charts/core/values.yaml`, and the
+[platform README](https://github.com/project-graphite/platform#projects) explains the layout.
+`deploy/strata/` is a full example. **PR** renders it, checks it with Docker Compose, flags names in
+`values.yaml` that `core.yaml` does not define and `${NAME}` references missing from `secrets`, and
+checks the memory budget.
 
 A `pages` site's values are only `enabled: true` and an optional `tag` pin. Its build comes from
 `deploy.source` in `.graphite.yml`.
 
 ## 6. Get its secrets added
 
-Ask an organisation owner to add the names listed under `secrets` to `secrets/<slug>.env`. Until
+Ask an organisation owner to add the names listed under each service's `secrets` to
+`secrets/<slug>.env`. Until
 they exist, a deploy stops with `waiting on secrets: …`.
 
 ## 7. Deploy and verify
