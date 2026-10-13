@@ -10,6 +10,7 @@
 | Deploy SSH | `ssh.project-graphite.com` through the tunnel and Cloudflare Access, user `deploy` |
 | Projects | `/srv/graphite/<slug>/`: `compose.yaml`, `secrets.env`, `sleep` |
 | Edge | `/srv/graphite/edge/`: Traefik, Sablier, cloudflared |
+| Console | `https://console.project-graphite.com`, see [console.md](console.md) |
 
 Renewing, resizing or adding an OVH option is a billing decision; check the current invoice first.
 

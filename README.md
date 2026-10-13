@@ -10,6 +10,7 @@ run on Cloudflare Pages; containerized projects run on one OVH VPS. `platform` d
 | Understand registry fields | [reference/registry.md](reference/registry.md) |
 | Understand hosting | [reference/hosting.md](reference/hosting.md) |
 | Run the VPS | [operations/vps.md](operations/vps.md) |
+| Use the console | [operations/console.md](operations/console.md) |
 | Move projects off Coolify | [operations/migrating-from-coolify.md](operations/migrating-from-coolify.md) |
 | Manage secrets | [operations/managing-secrets.md](operations/managing-secrets.md) |
 | Operate Graphite Tracker | [operations/graphite-tracker.md](operations/graphite-tracker.md) |

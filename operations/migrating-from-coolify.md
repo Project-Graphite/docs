@@ -95,6 +95,20 @@ Actions → **Deploy** → Run workflow with `edge`. It writes the tunnel routes
 `ssh.project-graphite.com` at the tunnel, and re-applies the edge over SSH. A green run proves SSH,
 Access and the API token all work.
 
+### Deploy the console
+
+1. **GitHub OAuth App.** Organisation settings → Developer settings → OAuth Apps → New, named
+   `Graphite Console`, homepage `https://console.project-graphite.com`, callback
+   `https://console.project-graphite.com/auth/callback`. Generate a client secret.
+2. **Access application.** Zero Trust → Access → Applications → Add → Self-hosted, domain
+   `console.project-graphite.com`, login method GitHub, one Allow policy for the GitHub organisation
+   `Project-Graphite`. Copy its audience (AUD) tag and your team name from Settings → Custom pages.
+3. **Secrets.** In `secrets`, `sops edit console.env` with `GITHUB_CLIENT_ID`,
+   `GITHUB_CLIENT_SECRET`, `SESSION_SECRET` (`openssl rand -base64 48`), `ACCESS_TEAM` and
+   `ACCESS_AUD`, then push.
+4. **Enable it.** Merge the `console` repository's first pull request so its image publishes, then
+   set `enabled: true` in `platform/deploy/console/values.yaml` and merge.
+
 ## 2. Move a project
 
 Do Message Lab first; it is the test application. Then `pixelpocket`, `graphite-tracker`, and
