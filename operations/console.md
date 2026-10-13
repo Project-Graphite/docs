@@ -12,6 +12,7 @@
 | Images | every image, its size and users; remove dangling images | — |
 | Volumes | every volume, its project, size and whether it is in use | — |
 | Shell | a root shell on the VPS | — |
+| Docs | the handbook, rendered from the `docs` repository | the same |
 
 Usage charts cover the last hour, 5 hours, day, 7 days or 30 days. Hover a chart for the time and
 every line's value; the line nearest the pointer is highlighted. Pins and the chosen range are kept
@@ -32,6 +33,28 @@ ssh -L 5432:<container ip>:5432 ubuntu@135.125.254.59
 The console's host is proxied through Cloudflare, and Cloudflare Access admits only organisation members. The console then signs in with GitHub: an
 organisation admin is an owner, and anyone else sees the projects they own or author in the
 registry. Sessions last 8 hours.
+
+## Setting it up
+
+Once, before the console's first deploy. The values in the last column go in `secrets/console.env`.
+
+1. **GitHub OAuth App for the console.** Organisation settings → Developer settings → OAuth Apps →
+   New. Homepage `https://console.project-graphite.com`, callback
+   `https://console.project-graphite.com/auth/callback`. Its client ID and a new client secret are
+   `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`.
+2. **GitHub OAuth App for Access.** A second app with homepage
+   `https://project-graphite.cloudflareaccess.com` and callback
+   `https://project-graphite.cloudflareaccess.com/cdn-cgi/access/callback`.
+3. **Login method.** Cloudflare Zero Trust (Free plan) → Integrations → Identity providers → Add →
+   GitHub, with the second app's client ID and secret. On GitHub's authorisation page, **Grant**
+   Project-Graphite before **Authorize**, or the organisation rule below matches no one. The team
+   name, `project-graphite`, is `ACCESS_TEAM`.
+4. **Access application.** Zero Trust → Access controls → Applications → Create → Self-hosted,
+   public hostname `console.project-graphite.com`, an Allow policy that includes the GitHub
+   organisation `Project-Graphite`, GitHub as the only identity provider. Its Application Audience
+   (AUD) tag, under Configure → Additional settings, is `ACCESS_AUD`.
+5. **SSL mode.** The `project-graphite.com` zone's SSL/TLS mode is Full (strict).
+6. `SESSION_SECRET` is any 32 or more random bytes, for example `openssl rand -base64 48`.
 
 ## What it can do
 

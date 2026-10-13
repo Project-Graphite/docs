@@ -35,15 +35,17 @@ platform Deploy -> https://deploy.project-graphite.com -> agent -> docker compos
 
 ## Bootstrap
 
-Once, as `ubuntu`, after `platform`'s deploy pull request is merged:
+Once, on a fresh VPS with Docker Compose and `python3`, as `ubuntu`:
 
 ```sh
 curl -fsSLO https://raw.githubusercontent.com/project-graphite/platform/main/host/bootstrap.sh
 sudo DEPLOY_TOKEN='<deploy token>' CF_DNS_API_TOKEN='<certificate token>' sh bootstrap.sh
 ```
 
-It creates the `deploy` system user in the `docker` group, the `/srv/graphite` tree and the `edge`
-network, installs `graphite-up`, the agent and its service, and starts the edge. Run it again to
+It creates the `deploy` system user in the `docker` group and the `/srv/graphite` tree, installs
+`graphite-up`, the agent and the edge files, writes `/etc/graphite-agent.env`, creates the `edge`
+network, enables `graphite-agent.service`, then runs `graphite-up edge`. The first certificate
+needs the certificate token to have Zone → Zone → Read as well as Zone → DNS → Edit. Run it again to
 update the agent.
 
 ## Everyday commands

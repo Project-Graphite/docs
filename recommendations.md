@@ -3,8 +3,8 @@
 ## In place
 
 - The platform deploy path: Helm-rendered Compose for containers and direct upload for static
-  sites, with values reviewed by pull request and a pinned image tag per deploy. Projects move onto
-  it one by one with [operations/migrating-from-coolify.md](operations/migrating-from-coolify.md).
+  sites, with values reviewed by pull request and a pinned image tag per deploy. Every project
+  deploys from `platform`.
 - Secret values moved to the owners-only, SOPS-encrypted `secrets` repository.
 - Traffic reaches Traefik directly with Let's Encrypt; CI deploys through a signed agent, so SSH stays limited to your address.
 - Idle demonstrations can sleep and wake on request; Message Lab does.
@@ -13,8 +13,7 @@
 
 ## Next
 
-1. Finish [operations/migrating-from-coolify.md](operations/migrating-from-coolify.md), then
-   measure `docker stats` and set each service's `reserve` to its real use.
+1. Measure `docker stats` and set each service's `reserve` to its real use.
 2. Back up Graphite Tracker, Message Lab and PixelPocket like Strata, and copy backups off the VPS
    once off-site storage and its cost are approved. Test a restore of each.
 3. Add availability and certificate checks from outside the VPS, with a user agent the sleep filter

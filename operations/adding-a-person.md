@@ -22,7 +22,8 @@ every project is built.
 Per repository, not org-wide. Repository → Settings → Collaborators and teams → Add — either the
 person directly, or a small team if several people share one project.
 
-They get **write on their own project only**. Read everywhere else.
+They get **write on their own project repository**, plus the platform repositories through
+`contributors`. Read everywhere else.
 
 ## 4. Their registry entry is created for them
 
@@ -57,5 +58,7 @@ project by editing `.graphite.yml` in their own repository; the registry sync va
 review. Hand-written person entries go through a reviewed pull request.
 
 **`main` rulesets.** Each platform repository blocks deletion and force-pushes on `main` and
-requires a squash-merged pull request with one approval. Organisation admins and the
-`graphite-deploy` app bypass it, so the registry sync, tag records and changelog keep pushing.
+requires a squash-merged pull request with one approval. Repository admins (organisation owners
+and `maintainers`) bypass it, and so does the `graphite-deploy` app on `platform`,
+`project-template`, `docs` and `graphite-hub`, so the registry sync, tag records and changelog keep
+pushing.

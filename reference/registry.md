@@ -25,6 +25,7 @@ A repository's `.graphite.yml` lists its entries under `projects`, with every fi
 | `authors` | yes | credited GitHub usernames |
 | `status` | yes | `live`, `wip`, `archived`, or `source-only` |
 | `listed` | no | `false` keeps the entry off the Hub; defaults to `true` |
+| `pinned` | no | `true` always shows the entry on the Hub home page, ahead of the others; defaults to `false` |
 | `paths` | no | repository folders whose commits belong to this entry's changelog; used by an epic's children |
 | `releases` | no | `auto` (default) or `manual`; `manual` records only version tags pushed by people |
 | `showcase` | no | problem, approach, outcome, and member contributions |
