@@ -36,7 +36,7 @@ their code, Dockerfiles and local `compose.yaml`.
 ## Platform deploys everything; Coolify is retired
 
 The platform **Deploy** workflow renders values with Helm into a Docker Compose project and applies
-it over SSH through Cloudflare Access, and builds static sites into Cloudflare Pages. Git holds the
+it through a signed request to a small deploy agent on the VPS, and builds static sites into Cloudflare Pages. Git holds the
 whole desired state, a deploy is a merge, and a rollback is a pinned tag. Coolify kept a second copy
 of that state in its own database and UI. Helm renders Compose today so the same values can move to
 a k3s cluster later; see [plans/k3s-transition.md](plans/k3s-transition.md).
@@ -48,10 +48,12 @@ owners can see, and its **Apply** workflow writes them to the VPS. Anyone can wr
 owner can supply what they reference. Owners are the deliberate bottleneck, the way an operations
 team owns a parameter store.
 
-## Traffic arrives through a tunnel
+## Traffic goes straight to the VPS
 
-Cloudflare Tunnel carries every hostname to Traefik on the VPS, so no web port is open, TLS is
-Cloudflare's, and deploy SSH goes through Cloudflare Access instead of a public port.
+Visitors reach Traefik on the VPS directly, as they did with Coolify, with Let's Encrypt
+certificates. CI deploys by posting signed requests to the deploy agent, so SSH stays open only to
+the owner's address. Only the console, which is root on the box, sits behind Cloudflare's proxy and
+Access.
 
 ## Idle demonstrations sleep
 

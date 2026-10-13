@@ -19,12 +19,12 @@ build absolute links from `/` may not render there; use an SSH tunnel for those.
 the container page shows the forwarding command:
 
 ```sh
-ssh -L 5432:<container ip>:5432 deploy@ssh.project-graphite.com
+ssh -L 5432:<container ip>:5432 ubuntu@135.125.254.59
 ```
 
 ## Sign-in
 
-Cloudflare Access admits only organisation members. The console then signs in with GitHub: an
+The console's host is proxied through Cloudflare, and Cloudflare Access admits only organisation members. The console then signs in with GitHub: an
 organisation admin is an owner, and anyone else sees the projects they own or author in the
 registry. Sessions last 8 hours.
 

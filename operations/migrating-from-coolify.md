@@ -1,203 +1,126 @@
-# Migrating from Coolify
+# Moving off Coolify
 
-Moves every project from Coolify to platform deploys, one at a time, on the same VPS. Coolify keeps
-serving a project until its own cutover, so nothing changes for visitors until then.
+A clean start: Coolify and everything it ran is removed, the VPS is wiped, and every project comes
+back fresh from `platform`. No data is kept. Sites are down from step 4 until step 7 finishes.
 
-## 1. Prepare
+## 1. Save the outside credentials
 
-Do these once, in order.
+From each Coolify application's Environment Variables, copy the values other services issued:
+the Gmail app password, `TMDB_READ_ACCESS_TOKEN`, `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET`,
+`RAWG_API_KEY`, `VAPID_*`, and `GAME_SOURCE` or `DISABLED_SOURCES` if set. Everything else gets a new
+value.
 
-### Merge the pull requests
+## 2. Merge the pull requests
 
-1. `actions`: *record static-site builds and add the vps-ssh action*
-2. `platform`: *deploy every project from platform*
-3. `graphite-message-lab`, `graphite-tracker`, `strata`, `pixelpocket`: *register only the host*
-4. `secrets`: *apply SOPS-encrypted project secrets*
-5. `graphite-hub`, `digital-to-physical`, `project-template`, `.github`, `docs`
+In this order:
 
-Every project starts with `enabled: false`, so merging deploys nothing. Leave each project's
-*retire the Coolify production compose* pull request open until its cutover.
+1. `actions`: *record static-site builds*, then *remove the Coolify webhook*.
+2. `platform`: *deploy every project from platform*. Every project starts `enabled: false`.
+3. `graphite-message-lab`, `graphite-tracker`, `strata`, `pixelpocket`: *register only the host*, then
+   *retire the Coolify production compose*.
+4. `secrets`, `graphite-hub`, `digital-to-physical`, `project-template`, `.github`, `docs`.
+5. `console`.
 
-### Create the keys on your machine
+The project and site merges record fresh builds in `platform/tags/`.
 
-```powershell
-ssh-keygen -t ed25519 -a 100 -f "$env:USERPROFILE\.ssh\graphite-deploy" -C graphite-deploy -N '""'
-New-Item -ItemType Directory -Force "$env:AppData\sops\age" | Out-Null
-age-keygen -o "$env:AppData\sops\age\keys.txt"
-```
+## 3. Create the credentials
 
-`age-keygen` prints the public key (`age1…`). Store the private key file's contents in your password
-manager. Install [sops](https://github.com/getsops/sops/releases) and
-[age](https://github.com/FiloSottile/age/releases) first if they are missing.
+1. **Deploy token.** `openssl rand -hex 32`. It goes to the VPS, `platform` and `secrets`.
+2. **age key.** On your machine:
 
-### Set up Cloudflare
+   ```powershell
+   New-Item -ItemType Directory -Force "$env:AppData\sops\age" | Out-Null
+   age-keygen -o "$env:AppData\sops\age\keys.txt"
+   ```
 
-1. **Tunnel.** Zero Trust → Networks → Tunnels → Create a tunnel → Cloudflared, named `graphite`.
-   Copy the token from the install command and the tunnel ID. Do not add public hostnames; platform
-   writes the tunnel's routes.
-2. **Service token.** Zero Trust → Access → Service credentials → Create service token
-   `graphite-deploy`. Copy the client ID and secret.
-3. **SSH application.** Zero Trust → Access → Applications → Add → Self-hosted, domain
-   `ssh.project-graphite.com`, one policy with action **Service Auth** that includes the
-   `graphite-deploy` service token.
-4. **API token.** My Profile → API Tokens → Create a custom token with Zone → DNS → Edit on
-   `project-graphite.com`, Account → Cloudflare Pages → Edit, and Account → Cloudflare Tunnel →
-   Edit.
-5. Copy the account ID and zone ID from the domain's overview page.
+   It prints the public key (`age1…`). Keep the file in your password manager.
+3. **Cloudflare API tokens.** My Profile → API Tokens → two custom tokens:
+   - for `platform`: Zone → DNS → Edit on `project-graphite.com` and Account → Cloudflare Pages →
+     Edit;
+   - for the VPS's certificates: Zone → DNS → Edit on `project-graphite.com` only.
 
-### Bootstrap the VPS
+   Copy the account ID and zone ID too.
+4. **Console sign-in.**
+   - A GitHub OAuth App in the organisation, `Graphite Console`, callback
+     `https://console.project-graphite.com/auth/callback`.
+   - Zero Trust → Settings → Authentication → add GitHub, using a second OAuth App with callback
+     `https://<team>.cloudflareaccess.com/cdn-cgi/access/callback`.
+   - Zero Trust → Access → Applications → Self-hosted `console.project-graphite.com`, GitHub
+     login, Allow the organisation `Project-Graphite`. Copy its AUD tag.
+   - Cloudflare → SSL/TLS: set the mode to **Full (strict)**, which the proxied console needs.
+
+## 4. Wipe the VPS
+
+Delete `COOLIFY_WEBHOOK` and `COOLIFY_TOKEN` from the four project repositories, then:
 
 ```sh
 ssh -i ~/.ssh/graphite-ovh ubuntu@135.125.254.59
-curl -fsSLO https://raw.githubusercontent.com/project-graphite/platform/main/host/bootstrap.sh
-sudo TUNNEL_TOKEN='<tunnel token>' sh bootstrap.sh '<contents of graphite-deploy.pub>'
-cat /etc/ssh/ssh_host_ed25519_key.pub
+sudo docker ps -aq | xargs -r sudo docker rm -f
+sudo docker volume ls -q | xargs -r sudo docker volume rm
+sudo docker network prune -f
+sudo docker image prune -af
+sudo rm -rf /data/coolify
+sudo ss -tlnp
 ```
 
-The last line is the host key. Your known-hosts value is `ssh.project-graphite.com ` followed by
-it.
+The last command must show nothing on 80, 443 or 8000. Docker stays installed.
 
-### Configure GitHub
+## 5. Bootstrap
 
-In `platform`, Settings → Environments → New environment `production`, with deployment branches
-limited to `main`. Then, from PowerShell in the folder holding the files:
+```sh
+curl -fsSLO https://raw.githubusercontent.com/project-graphite/platform/main/host/bootstrap.sh
+sudo DEPLOY_TOKEN='<deploy token>' CF_DNS_API_TOKEN='<certificate token>' sh bootstrap.sh
+```
+
+## 6. Configure GitHub and the secrets
+
+In `platform`, Settings → Environments → `production`, limited to `main`, then:
 
 ```powershell
 $repo = "Project-Graphite/platform"
-Get-Content "$env:USERPROFILE\.ssh\graphite-deploy" -Raw | gh secret set DEPLOY_SSH_KEY --repo $repo --env production
-gh secret set DEPLOY_KNOWN_HOSTS --repo $repo --env production
-gh secret set CF_ACCESS_CLIENT_ID --repo $repo --env production
-gh secret set CF_ACCESS_CLIENT_SECRET --repo $repo --env production
+gh secret set DEPLOY_TOKEN --repo $repo --env production
 gh secret set CLOUDFLARE_API_TOKEN --repo $repo --env production
-gh variable set DEPLOY_SSH_HOST --repo $repo --body ssh.project-graphite.com
+gh variable set DEPLOY_URL --repo $repo --body https://deploy.project-graphite.com
+gh variable set VPS_IPV4 --repo $repo --body 135.125.254.59
 gh variable set CLOUDFLARE_ACCOUNT_ID --repo $repo --body <account id>
 gh variable set CLOUDFLARE_ZONE_ID --repo $repo --body <zone id>
-gh variable set TUNNEL_ID --repo $repo --body <tunnel id>
 ```
 
-`gh secret set` without `--body` prompts for the value, so nothing lands in your shell history.
+In `secrets`: the secrets `DEPLOY_TOKEN` and `SOPS_AGE_KEY` (the private key), the variable
+`DEPLOY_URL`, and your public key in place of `AGE_PUBLIC_KEY` in `.sops.yaml`.
 
-In `secrets`, set the same `DEPLOY_SSH_KEY`, `DEPLOY_KNOWN_HOSTS`, `CF_ACCESS_CLIENT_ID` and
-`CF_ACCESS_CLIENT_SECRET` as repository secrets, `SOPS_AGE_KEY` to the private age key, and the
-variable `DEPLOY_SSH_HOST`. Then replace `AGE_PUBLIC_KEY` in its `.sops.yaml` with your public key,
-and add the tunnel token:
+Then run platform **Deploy** with `edge`: it points `deploy.project-graphite.com` at the VPS and
+re-applies the edge, which proves the token and the agent work.
 
-```sh
-sops edit edge.env          # TUNNEL_TOKEN=<tunnel token>
-git add .sops.yaml edge.env
-git commit -m "chore: add the age key and the edge secrets"
-git push
-```
+Now write one file per project with `sops edit <name>.env`, using `openssl rand -base64 32` for new
+values:
 
-### Start the edge from platform
+| File | Required | Optional |
+| :--- | :--- | :--- |
+| `edge.env` | `CF_DNS_API_TOKEN` (the certificate token) | |
+| `graphite-message-lab.env` | `SECRET_KEY`, `POSTGRES_PASSWORD` | |
+| `graphite-tracker.env` | `POSTGRES_PASSWORD`, `AUTH_ACCESS_TOKEN_SECRET`, `EMAIL_HOST`, `DEFAULT_FROM_EMAIL` | `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `TMDB_READ_ACCESS_TOKEN`, `GAME_SOURCE`, `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET`, `RAWG_API_KEY`, `DISABLED_SOURCES` |
+| `strata.env` | `POSTGRES_PASSWORD`, `REDIS_PASSWORD`, `AUTH_ACCESS_TOKEN_SECRET`, `DATA_ENCRYPTION_KEY` (32 bytes), `EMAIL_HOST`, `DEFAULT_FROM_EMAIL` | `EMAIL_PORT`, `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `VAPID_*`, `BACKUP_KEEP_DAYS` |
+| `pixelpocket.env` | `MONGO_PASSWORD`, `MINIO_ROOT_PASSWORD`, `S3_SECRET_KEY`, `JWT_SECRET`, `EMAIL_HOST`, `EMAIL_FROM` | `EMAIL_PORT`, `EMAIL_USERNAME`, `EMAIL_PASSWORD` |
+| `console.env` | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `SESSION_SECRET`, `ACCESS_TEAM`, `ACCESS_AUD` | |
 
-Actions → **Deploy** → Run workflow with `edge`. It writes the tunnel routes, points
-`ssh.project-graphite.com` at the tunnel, and re-applies the edge over SSH. A green run proves SSH,
-Access and the API token all work.
+Push; **Apply** sends each file to the agent.
 
-### Deploy the console
+## 7. Deploy everything
 
-1. **GitHub OAuth App.** Organisation settings → Developer settings → OAuth Apps → New, named
-   `Graphite Console`, homepage `https://console.project-graphite.com`, callback
-   `https://console.project-graphite.com/auth/callback`. Generate a client secret.
-2. **GitHub login for Access.** Zero Trust → Settings → Authentication → Login methods → Add →
-   GitHub. It needs a second OAuth App in the organisation, with callback
-   `https://<team>.cloudflareaccess.com/cdn-cgi/access/callback`; the team name is under Settings →
-   Custom pages.
-3. **Access application.** Zero Trust → Access → Applications → Add → Self-hosted, domain
-   `console.project-graphite.com`, login method GitHub, one Allow policy for the GitHub organisation
-   `Project-Graphite`. Copy its audience (AUD) tag.
-4. **Secrets.** In `secrets`, `sops edit console.env` with `GITHUB_CLIENT_ID`,
-   `GITHUB_CLIENT_SECRET`, `SESSION_SECRET` (`openssl rand -base64 48`), `ACCESS_TEAM` and
-   `ACCESS_AUD`, then push.
-5. **Enable it.** Merge the `console` repository's first pull request so its image publishes, then
-   set `enabled: true` in `platform/deploy/console/values.yaml` and merge.
+1. Cloudflare → Workers & Pages: delete the Git-connected `graphite-hub` and `digital-to-physical`
+   projects.
+2. In `platform`, merge one pull request setting `enabled: true` in `deploy/` for
+   `graphite-message-lab`, `graphite-tracker`, `strata`, `pixelpocket`, `console`, `graphite-hub` and
+   `digital-to-physical`. **Deploy** starts every project, publishes its route, points its
+   hostname at the VPS, and builds and uploads both sites.
+3. Register on Graphite Tracker and grant yourself the system manager from the console's **Shell**:
+   `docker exec -it graphite-tracker-app-1 npm run system-manager:grant --workspace server -- <email>`.
 
-## 2. Move a project
+## 8. Finish
 
-Do Message Lab first; it is the test application. Then `pixelpocket`, `graphite-tracker`, and
-`strata` last.
-
-1. **Copy its environment.** In Coolify, open the application → Environment Variables and copy every
-   variable except `IMAGE_TAG`. In `secrets`:
-
-   ```sh
-   sops edit <slug>.env        # paste NAME=value lines
-   git add <slug>.env && git commit -m "chore(<slug>): add secrets" && git push
-   ```
-
-2. **Stop it in Coolify.** The application → Stop. The site is down from here until step 4.
-
-3. **Copy its volumes.** On the VPS, list the Coolify volumes (named `<application id>_<volume>`),
-   then copy each one:
-
-   ```sh
-   sudo docker volume ls
-   curl -fsSLO https://raw.githubusercontent.com/project-graphite/platform/main/host/migrate-volume.sh
-   sudo sh migrate-volume.sh <coolify volume> <slug> <volume>
-   ```
-
-   | Project | Volumes |
-   | :--- | :--- |
-   | `graphite-message-lab` | `postgres-data`, `redis-data` |
-   | `graphite-tracker` | `postgres-data`, `redis-data` |
-   | `pixelpocket` | `mongo-data`, `minio-data` |
-   | `strata` | `postgres-data`, `redis-data`, `files-data`, `backups` |
-
-4. **Enable it.** Open a pull request in `platform` setting `enabled: true` in
-   `deploy/<slug>/values.yaml`, and merge it. **Deploy** checks the secrets exist, starts the
-   project, publishes its route, and replaces the hostname's A record with the tunnel.
-
-5. **Verify.** Open the site, sign in, check data is there, and read
-   `sudo docker compose -p <slug> logs --tail 100`.
-
-6. **Stop Coolify deploys.** Delete `COOLIFY_WEBHOOK` and `COOLIFY_TOKEN` from the project
-   repository's Actions secrets, then merge its *retire the Coolify production compose* pull
-   request.
-
-7. **Delete it in Coolify** once you are satisfied, then remove the old volumes:
-   `sudo docker volume rm <coolify volume>`.
-
-**Rolling back during a cutover:** set `enabled: false` (its deploy stops the project), start the
-application again in Coolify, and recreate the hostname's DNS-only A record to `135.125.254.59`.
-
-## 3. Move the static sites
-
-For `graphite-hub` and `digital-to-physical`:
-
-1. Push to the repository's `main`, or rerun its **Main** workflow, so `tags/<slug>.json` records a
-   build.
-2. In Cloudflare → Workers & Pages, find the site's Git-connected project. If its name equals the
-   slug, delete it; otherwise remove its custom domain. The site is down until step 3 finishes.
-3. Set `enabled: true` in `platform/deploy/<slug>/values.yaml` and merge. **Deploy** builds the
-   recorded commit, creates the direct-upload Pages project, attaches the domain and points DNS at
-   it.
-4. Verify the site, then delete any old project you kept.
-
-`traceboard` stays on Git integration: it is private, so organisation secrets cannot reach it to
-record builds.
-
-## 4. Remove Coolify
-
-After every project is moved:
-
-```sh
-sudo docker ps -a --filter name=coolify --format '{{.Names}}'
-sudo docker rm -f $(sudo docker ps -aq --filter name=coolify)
-sudo docker volume ls --filter name=coolify
-sudo docker volume rm coolify-db coolify-redis
-sudo docker network rm coolify
-sudo rm -rf /data/coolify
-```
-
-Then delete the `coolify.project-graphite.com` DNS record, remove the TCP 80, TCP 443 and UDP 443
-rules from the OVH edge firewall, and merge the `actions` pull request *remove the Coolify webhook*.
-Check `gh secret list` in each project repository shows no `COOLIFY_*` left.
-
-## 5. Done when
-
-- [ ] every compose project shows `enabled: true` and answers on its hostname
+- [ ] every site answers, and the console shows every container
 - [ ] Message Lab sleeps after 30 minutes and wakes on the next visit
-- [ ] the Hub and Digital to Physical deploy from platform
-- [ ] no `COOLIFY_*` secrets, no Coolify containers, no open web ports
-- [ ] `docker stats` matches `deploy/host.yaml`; update each `reserve` to measured use
+- [ ] the `coolify.project-graphite.com` DNS record is deleted
+- [ ] the OVH firewall still allows only 22 from your IP, 80, 443/tcp and 443/udp
+- [ ] after a day, each service's `reserve` matches what the console shows

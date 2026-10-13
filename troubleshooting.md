@@ -20,8 +20,8 @@ the values.
 ## A project is healthy internally but the hostname fails
 
 Check, in order: the route file `/srv/graphite/edge/routes/<slug>.yml` exists and names the public
-service's `port`; `sudo docker logs edge-traefik-1` shows no route error; the hostname is a proxied
-CNAME to the tunnel in Cloudflare; the tunnel is healthy in Zero Trust → Networks → Tunnels.
+service's `port`; `sudo docker logs edge-traefik-1` shows no route or certificate error; the
+hostname is an A record to `135.125.254.59` in Cloudflare.
 Rerunning **Deploy** for the project rewrites the route and the DNS record.
 
 ## Deploy fails with "waiting on secrets"

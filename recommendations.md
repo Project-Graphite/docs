@@ -6,7 +6,7 @@
   sites, with values reviewed by pull request and a pinned image tag per deploy. Projects move onto
   it one by one with [operations/migrating-from-coolify.md](operations/migrating-from-coolify.md).
 - Secret values moved to the owners-only, SOPS-encrypted `secrets` repository.
-- Traffic arrives through a Cloudflare Tunnel; deploy SSH goes through Cloudflare Access.
+- Traffic reaches Traefik directly with Let's Encrypt; CI deploys through a signed agent, so SSH stays limited to your address.
 - Idle demonstrations can sleep and wake on request; Message Lab does.
 - A memory budget in `platform/deploy/host.yaml` is checked on every pull request.
 - Strata backs up its database and files nightly.

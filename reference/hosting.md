@@ -15,18 +15,19 @@ project-graphite.com/members/<handle>     member portfolio
 project-graphite.com/projects/<slug>      project case study
 project-graphite.com/epics/<slug>         epic
 project-graphite.com/epics/<epic>/<slug>  project inside an epic
-ssh.project-graphite.com                  deploy SSH, behind Cloudflare Access
+deploy.project-graphite.com               the VPS deploy agent
+console.project-graphite.com              the console, behind Cloudflare Access
 ```
 
-**Deploy** owns these DNS records. A `compose` host is a proxied CNAME to the tunnel; a `pages` host
-is a proxied CNAME to `<slug>.pages.dev`. Hostnames stay one level below the apex so Cloudflare's
+**Deploy** owns these DNS records. A `compose` host is a DNS-only A record to the VPS, or a proxied
+one when its values set `proxied: true`; a `pages` host is a proxied CNAME to `<slug>.pages.dev`. Hostnames stay one level below the apex so Cloudflare's
 universal certificate covers them.
 
 ## Routing
 
-The tunnel sends every hostname to Traefik on `127.0.0.1:8080`. Traefik routes by host to the
-project's public service on the `edge` Docker network. No database, queue or app port is published
-on the host, and no web port is open on the VPS.
+Traefik listens on 80 and 443, redirects HTTP to HTTPS, gets each host's certificate from Let's
+Encrypt through a Cloudflare DNS challenge, and routes by host to the project's public service on
+the `edge` Docker network. No database, queue or app port is published on the host.
 
 ## Sleeping
 
