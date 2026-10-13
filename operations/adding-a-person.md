@@ -11,7 +11,7 @@ ones only through a team. Private repositories, such as `secrets`, are for owner
 
 | Team | Gives | Use for |
 | :--- | :--- | :--- |
-| `contributors` | read on `actions`, `platform`, `project-template`, `docs`, `.github`, `graphite-hub`; they change them through pull requests from forks | everyone |
+| `contributors` | write on `actions`, `platform`, `project-template`, `docs`, `.github`, `graphite-hub`; `main` takes only reviewed pull requests | everyone |
 | `maintainers` | admin on `actions`, `platform`, `project-template`, `.github`, `graphite-hub`, `docs` | people who own the platform with you |
 
 Add nearly everyone to `contributors`. `maintainers` is for someone you would trust to change how
@@ -31,8 +31,8 @@ fills `name`, `headline` and `links` from their GitHub profile. It refreshes the
 sync. The sync runs on any `.graphite.yml` push in the organisation, or by hand from
 `platform` → Actions → **Sync registry**.
 
-To write their profile by hand instead, they set `profile: manual` and edit the file in a
-fork of `platform`, changing only `people/<handle>.yml`, then open a pull request for a
+To write their profile by hand instead, they set `profile: manual` and edit the file on a
+branch of `platform`, changing only `people/<handle>.yml`, then open a pull request for a
 maintainer to approve.
 `bio` and `stack` are always written by hand. See [../reference/registry.md](../reference/registry.md).
 
@@ -51,8 +51,8 @@ author.
 repository cannot read organisation secrets, so its pipeline fails in a way that looks like a bug.
 They can create public ones.
 
-**They cannot push to the platform repositories.** Contributors have read access and open pull
-requests from forks, whose workflows never receive the organisation's secrets. They register a
+**They cannot push to `main` on the platform repositories.** Contributors push branches and open
+pull requests, and a maintainer approves them. They register a
 project by editing `.graphite.yml` in their own repository; the registry sync validates it, then opens and merges the `platform` pull request without maintainer
 review. Hand-written person entries go through a reviewed pull request.
 
