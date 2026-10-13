@@ -12,6 +12,7 @@
 | Images | every image, its size and users; remove dangling images | — |
 | Volumes | every volume, its project, size and whether it is in use | — |
 | Shell | a root shell on the VPS | — |
+| Docs | the handbook, rendered from the `docs` repository | the same |
 
 Usage charts cover the last hour, 5 hours, day, 7 days or 30 days. Hover a chart for the time and
 every line's value; the line nearest the pointer is highlighted. Pins and the chosen range are kept

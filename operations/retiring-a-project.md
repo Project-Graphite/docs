@@ -20,6 +20,9 @@ authors, showcase and tag history.
 Set `enabled: false` in `platform/deploy/<slug>/values.yaml` and merge. **Deploy** removes its route
 and stops its containers. Its volumes and `secrets.env` stay on the VPS.
 
+A `pages` site has nothing on the VPS. `enabled: false` only stops new uploads; the site keeps
+serving until its Pages project is deleted.
+
 ## Preserve state
 
 Before deleting anything, export the database, record the last image tag, and decide how long to
@@ -34,6 +37,9 @@ Each step deletes data or changes DNS; prepare the exact targets and approve eac
 2. In `secrets`: delete `<slug>.env`.
 3. In `platform`: delete `deploy/<slug>/`.
 4. In Cloudflare: delete the hostname's DNS record.
+
+For a `pages` site, skip steps 1 and 2: delete `deploy/<slug>/` in `platform`, then in Cloudflare →
+Workers & Pages delete the Pages project, and delete the hostname's CNAME.
 
 Do not reuse a retired hostname immediately. The archived registry entry keeps the Hub history but no
 longer claims the hostname.

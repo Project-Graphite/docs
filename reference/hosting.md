@@ -20,8 +20,10 @@ console.project-graphite.com              the console, behind Cloudflare Access
 ```
 
 **Deploy** owns these DNS records. A `compose` host is a DNS-only A record to the VPS, or a proxied
-one when its values set `proxied: true`; a `pages` host is a proxied CNAME to `<slug>.pages.dev`. Hostnames stay one level below the apex so Cloudflare's
-universal certificate covers them.
+one when its values set `proxied: true`, as only the console does; a `pages` host is a proxied
+CNAME to `<slug>.pages.dev`. VPS hosts use Traefik's Let's Encrypt certificates. Cloudflare's
+universal certificate only matters for the proxied hosts, and hostnames stay one level below the
+apex so it covers them.
 
 ## Routing
 

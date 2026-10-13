@@ -14,7 +14,8 @@ A push that changes `<slug>.env` decrypts it in **Apply**, writes
 `/srv/graphite/<slug>/secrets.env` through the deploy agent, and restarts that project. A deploy refuses to run
 while a name listed in `secrets:` is missing and reports `waiting on secrets: …`.
 
-`edge.env` holds `CF_DNS_API_TOKEN`, the DNS-only token Traefik uses for certificates.
+`edge.env` holds `CF_DNS_API_TOKEN`, the token Traefik uses for certificates. It needs Zone → Zone →
+Read and Zone → DNS → Edit on `project-graphite.com`.
 
 ## Keys
 
@@ -23,11 +24,13 @@ while a name listed in `secrets:` is missing and reports `waiting on secrets: �
 | age private key | your password manager, `%AppData%\sops\age\keys.txt`, `secrets` → `SOPS_AGE_KEY` |
 | age public key | `secrets/.sops.yaml` |
 | deploy token | your password manager, `/etc/graphite-agent.env` on the VPS, `DEPLOY_TOKEN` in `platform` (`production`) and `secrets` |
-| Cloudflare API token | `CLOUDFLARE_API_TOKEN` in `platform` (`production`) |
+| Cloudflare API token | `CLOUDFLARE_API_TOKEN` in `platform` (`production`); Zone → DNS → Edit on `project-graphite.com` and Account → Cloudflare Pages → Edit |
 | certificate DNS token | `secrets/edge.env` |
 
 `platform`'s `production` environment only runs from `main`, so a pull request branch cannot read
-them.
+them. **Deploy** also reads the `platform` variables `DEPLOY_URL`
+(`https://deploy.project-graphite.com`), `VPS_IPV4` (`135.125.254.59`), `CLOUDFLARE_ACCOUNT_ID`
+and `CLOUDFLARE_ZONE_ID`.
 
 ## Rotating
 

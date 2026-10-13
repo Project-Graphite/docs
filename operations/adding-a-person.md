@@ -22,7 +22,8 @@ every project is built.
 Per repository, not org-wide. Repository → Settings → Collaborators and teams → Add — either the
 person directly, or a small team if several people share one project.
 
-They get **write on their own project only**. Read everywhere else.
+They get **write on their own project repository**, plus the platform repositories through
+`contributors`. Read everywhere else.
 
 ## 4. Their registry entry is created for them
 

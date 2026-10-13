@@ -9,8 +9,9 @@ registry, and CI publishes a matching immutable image for each one.
 ## Applications use subdomains; showcases use paths
 
 `atlas.project-graphite.com` is the application. `project-graphite.com/projects/atlas` describes it.
-Subdomains isolate browser cookies, storage, and service workers. Hostnames stay one level below the
-apex so Cloudflare's standard certificate coverage is sufficient.
+Subdomains isolate browser cookies, storage, and service workers. VPS hosts get Let's Encrypt
+certificates from Traefik. Cloudflare's certificate only matters for proxied hosts, the console and
+the Pages sites, and hostnames stay one level below the apex so its standard coverage is sufficient.
 
 ## Public code, including the control plane
 
@@ -50,10 +51,9 @@ team owns a parameter store.
 
 ## Traffic goes straight to the VPS
 
-Visitors reach Traefik on the VPS directly, as they did with Coolify, with Let's Encrypt
-certificates. CI deploys by posting signed requests to the deploy agent, so SSH stays open only to
-the owner's address. Only the console, which is root on the box, sits behind Cloudflare's proxy and
-Access.
+Visitors reach Traefik on the VPS directly, with Let's Encrypt certificates. CI deploys by posting
+signed requests to the deploy agent, so SSH stays open only to the owner's address. Of the VPS
+hosts, only the console, which is root on the box, sits behind Cloudflare's proxy and Access.
 
 ## Idle demonstrations sleep
 

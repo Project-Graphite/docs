@@ -85,10 +85,13 @@ help: it is already in the reflog, in forks and in anything that cloned it.
 
 Your own project repository is yours. Merge what you like there.
 
-`platform`, `actions` and `graphite-hub` need review from `@project-graphite/maintainers`, because a
-change there affects everyone else. CODEOWNERS requests that review on `platform`, `actions`, and
-graphite-hub's `.github/` and `site/src/data/`; it does not block a merge. Registry-sync pull
-requests on `platform` merge automatically once validation passes.
+The six platform repositories (`platform`, `actions`, `project-template`, `docs`, `.github`,
+`graphite-hub`) need a pull request with one approval, because a change there affects everyone
+else. Their `main` rulesets also block deletion and force-pushes. Admins bypass them, and so does
+the `graphite-deploy` app where automation pushes. CODEOWNERS requests review from
+`@project-graphite/maintainers` on `platform`, `actions`, and the `.github/` folders of
+`graphite-hub` and `project-template`, plus graphite-hub's `site/src/data/`; it does not block a
+merge. Registry-sync pull requests on `platform` merge automatically once validation passes.
 
 ## What belongs where
 
@@ -96,7 +99,9 @@ requests on `platform` merge automatically once validation passes.
 | :--- | :--- |
 | Project code | that project |
 | How every project is built or checked | `actions` |
-| What a project is, or how it is deployed | that project's `.graphite.yml`, synced into `platform` |
+| What a project is | that project's `.graphite.yml`, synced into `platform` |
+| How it is deployed, its production values | `platform/deploy/<slug>/values.yaml`, by pull request |
+| Its secret values | the owners-only `secrets` repository, added by an owner |
 | How the site looks | `graphite-hub` |
 | How the organisation works | `docs` |
 

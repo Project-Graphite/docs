@@ -53,7 +53,8 @@ How the values map:
 ## Steps
 
 1. **Chart 2.0.0.** Add the Kubernetes templates beside the Compose ones, selected by the major
-   version, and render all four projects in **PR** with `kubeconform`.
+   version, and render all five Compose projects (`console`, `graphite-message-lab`,
+   `graphite-tracker`, `pixelpocket`, `strata`) in **PR** with `kubeconform`.
 2. **New VPS.** Install k3s with its Traefik, cert-manager with the Cloudflare DNS
    challenge, Argo CD (slimmed), Reloader and the sleep controller.
 3. **Apply.** Teach the secrets **Apply** workflow to write Kubernetes Secrets when the target host
@@ -61,7 +62,9 @@ How the values map:
 4. **Pilot Message Lab.** Back up its database, restore it into the cluster, bump it to
    `core: 2.0.0`, point its DNS at the new VPS, verify, then remove it from the old VPS.
 5. **The rest:** PixelPocket, Graphite Tracker, then Strata.
-6. **Retire the old VPS** and the Compose templates, and release chart 3.0.0 without them.
+6. **The console.** It runs privileged with `pid: host` and the Docker socket, so it needs its own
+   step rather than a values bump.
+7. **Retire the old VPS** and the Compose templates, and release chart 3.0.0 without them.
 
 Each project moves by changing one line in its values, and moves back the same way.
 

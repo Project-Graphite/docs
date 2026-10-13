@@ -58,5 +58,6 @@ the key to leak from.
 3. Check commit and pull-request history in every organisation repository for anything the leak
    period allows.
 
-The blast radius is Contents and Pull requests write on every organisation repository. The key
-gives no access to secrets and no admin rights.
+The blast radius is Contents and Pull requests write on every organisation repository, including
+`secrets`. There it can read the encrypted files but not decrypt them without the age key, and a
+commit it pushes runs **Apply**. The key gives no admin rights.

@@ -21,8 +21,21 @@ the values.
 
 Check, in order: the route file `/srv/graphite/edge/routes/<slug>.yml` exists and names the public
 service's `port`; `sudo docker logs edge-traefik-1` shows no route or certificate error; the
-hostname is an A record to `135.125.254.59` in Cloudflare.
+hostname is a DNS-only A record to `135.125.254.59` in Cloudflare, proxied only for the console.
 Rerunning **Deploy** for the project rewrites the route and the DNS record.
+
+## A host serves "TRAEFIK DEFAULT CERT"
+
+**Cause.** Traefik could not get a Let's Encrypt certificate because the certificate token lacks
+Zone → Zone → Read. It needs that and Zone → DNS → Edit on `project-graphite.com`.
+
+**Fix.** Fix the token's permissions or create a new one. Update `CF_DNS_API_TOKEN` in
+`secrets/edge.env` and push, and **Apply** re-applies the edge; or edit
+`/srv/graphite/edge/secrets.env` on the VPS and run:
+
+```sh
+sudo -u deploy /srv/graphite/bin/graphite-up edge
+```
 
 ## Deploy fails with "waiting on secrets"
 
@@ -39,7 +52,8 @@ Rerunning **Deploy** for the project rewrites the route and the DNS record.
 
 ## A static site deploy says the Pages project is connected to Git
 
-**Cause.** A Git-integrated Cloudflare Pages project already uses the slug.
+**Cause.** A Git-integrated Cloudflare Pages project already uses the slug. **Deploy** only creates
+direct-upload projects, so this happens only if someone recreates one by hand connected to Git.
 
 **Fix.** Delete it in Cloudflare → Workers & Pages and rerun **Deploy** for the site, which creates a
 direct-upload project with the same name.
@@ -50,6 +64,13 @@ Something keeps requesting it. Bots and monitors whose user agent says so are ig
 `sudo docker logs edge-sablier-1` shows when sessions start; to see the caller, add `accessLog: {}`
 to `platform/edge/traefik.yml` for a while, then add its user agent pattern to `ignoreUserAgent` in
 the core chart's route template.
+
+## A sleeping project never sleeps
+
+**Cause.** An open browser tab polling it renews its session with every request.
+
+**Fix.** Look for repeating requests in the public service's logs, for example
+`sudo docker logs graphite-message-lab-web-1`, and close the tab making them.
 
 ## A workflow run fails with no jobs and no log
 
@@ -110,7 +131,7 @@ gh secret set PLATFORM_APP_PRIVATE_KEY --repo project-graphite/<repository> < ke
 ```
 
 Public repositories pick up organisation secrets automatically, which is why every repository
-except `traceboard` is public and members cannot create private ones.
+except `traceboard` and the owners-only `secrets` is public and members cannot create private ones.
 
 ---
 

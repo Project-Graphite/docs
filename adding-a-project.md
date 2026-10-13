@@ -45,6 +45,9 @@ Open a pull request in `platform` adding `deploy/<slug>/values.yaml`. The fields
 is a full example. **PR** renders it, checks it with Docker Compose, flags `${NAME}` references
 missing from `secrets`, and checks the memory budget.
 
+A `pages` site's values are only `enabled: true` and an optional `tag` pin. Its build comes from
+`deploy.source` in `.graphite.yml`.
+
 ## 6. Get its secrets added
 
 Ask an organisation owner to add the names listed under `secrets` to `secrets/<slug>.env`. Until
