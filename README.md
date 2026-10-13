@@ -14,6 +14,7 @@ run on Cloudflare Pages; containerized projects run on one OVH VPS. `platform` d
 | Understand the shared workflows | [reference/workflows.md](reference/workflows.md) |
 | Run the VPS | [operations/vps.md](operations/vps.md) |
 | Use the console | [operations/console.md](operations/console.md) |
+| Watch for outages and get alerts | [operations/monitoring.md](operations/monitoring.md) |
 | Manage secrets | [operations/managing-secrets.md](operations/managing-secrets.md) |
 | Operate Graphite Tracker | [operations/graphite-tracker.md](operations/graphite-tracker.md) |
 | Add a member | [operations/adding-a-person.md](operations/adding-a-person.md) |
