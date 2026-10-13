@@ -4,15 +4,28 @@
 [`console`](https://github.com/project-graphite/console). Values:
 `platform/deploy/console/values.yaml`.
 
-| Page | Owners | Contributors |
-| :--- | :--- | :--- |
-| Overview | host CPU, memory, swap and disk; host usage charts; storage by images, volumes, container layers and build cache; one row per project with status, CPU, memory and storage, filterable and pinnable | their own projects |
-| Project | usage chart with a line per container; containers; images and volumes with sizes; wake | the same, without wake |
-| Container | usage chart, details and networks, live logs, start, stop, restart, wake, a shell, its ports | usage chart, details, live logs |
-| Images | every image, its size and users; remove dangling images | — |
-| Volumes | every volume, its project, size and whether it is in use | — |
-| Shell | a root shell on the VPS | — |
-| Docs | the handbook, rendered from the `docs` repository | the same |
+| Page | Shows |
+| :--- | :--- |
+| Overview | host CPU, memory, swap and disk; host usage charts; storage by images, volumes, container layers and build cache; one row per project with status, CPU, memory and storage, filterable and pinnable |
+| Project | usage chart with a line per container; containers; images and volumes with sizes; wake |
+| Container | usage chart, details and networks, live logs; start, stop, restart, wake, a shell and its ports |
+| Images | every image, its size and users; remove dangling images |
+| Volumes | every volume, its project, size and whether it is in use |
+| Shell | a root shell on the VPS |
+| Admin | owners only: every organisation member, when they last signed in, and their write access |
+| Docs | the handbook, rendered from the `docs` repository |
+
+Every organisation member can read every page except Admin. Changing anything needs write access,
+which an owner sets per member on the Admin page:
+
+| Access | Lets them |
+| :--- | :--- |
+| a project | start, stop, restart and wake it, and open its containers' terminals and ports |
+| images | remove dangling images |
+| host shell | open the root shell on the VPS |
+| everything | all of the above, for every project |
+
+Owners have everything.
 
 Usage charts cover the last hour, 5 hours, day, 7 days or 30 days. Hover a chart for the time and
 every line's value; the line nearest the pointer is highlighted. Pins and the chosen range are kept
@@ -31,10 +44,10 @@ ssh -L 5432:<container ip>:5432 ubuntu@135.125.254.59
 ## Sign-in
 
 The console's host is proxied through Cloudflare, and Cloudflare Access admits only organisation members. The console then signs in with GitHub: an
-organisation admin is an owner, and anyone else sees the projects they own or author in the
-registry. Sessions last 1 hour. Owner actions (start, stop, restart, wake, prune, terminals, the
-host shell, open ports) recheck the role with GitHub before they run, so a demoted owner loses them
-within a minute and their open terminals close at their next refused action or hourly recheck.
+organisation admin is an owner, and anyone else is a member. Sessions last 1 hour. Every change
+rechecks the role with GitHub and the member's access before it runs, so a demoted owner or a
+removed grant takes effect within a minute. Removing access on the Admin page also closes that
+member's open terminals for it at once.
 
 ## Setting it up
 
