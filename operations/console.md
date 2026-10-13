@@ -32,7 +32,9 @@ ssh -L 5432:<container ip>:5432 ubuntu@135.125.254.59
 
 The console's host is proxied through Cloudflare, and Cloudflare Access admits only organisation members. The console then signs in with GitHub: an
 organisation admin is an owner, and anyone else sees the projects they own or author in the
-registry. Sessions last 8 hours.
+registry. Sessions last 1 hour. Owner actions (start, stop, restart, wake, prune, terminals, the
+host shell, open ports) recheck the role with GitHub before they run, so a demoted owner loses them
+within a minute and their open terminals close at their next refused action or hourly recheck.
 
 ## Setting it up
 
