@@ -100,13 +100,17 @@ Access and the API token all work.
 1. **GitHub OAuth App.** Organisation settings → Developer settings → OAuth Apps → New, named
    `Graphite Console`, homepage `https://console.project-graphite.com`, callback
    `https://console.project-graphite.com/auth/callback`. Generate a client secret.
-2. **Access application.** Zero Trust → Access → Applications → Add → Self-hosted, domain
+2. **GitHub login for Access.** Zero Trust → Settings → Authentication → Login methods → Add →
+   GitHub. It needs a second OAuth App in the organisation, with callback
+   `https://<team>.cloudflareaccess.com/cdn-cgi/access/callback`; the team name is under Settings →
+   Custom pages.
+3. **Access application.** Zero Trust → Access → Applications → Add → Self-hosted, domain
    `console.project-graphite.com`, login method GitHub, one Allow policy for the GitHub organisation
-   `Project-Graphite`. Copy its audience (AUD) tag and your team name from Settings → Custom pages.
-3. **Secrets.** In `secrets`, `sops edit console.env` with `GITHUB_CLIENT_ID`,
+   `Project-Graphite`. Copy its audience (AUD) tag.
+4. **Secrets.** In `secrets`, `sops edit console.env` with `GITHUB_CLIENT_ID`,
    `GITHUB_CLIENT_SECRET`, `SESSION_SECRET` (`openssl rand -base64 48`), `ACCESS_TEAM` and
    `ACCESS_AUD`, then push.
-4. **Enable it.** Merge the `console` repository's first pull request so its image publishes, then
+5. **Enable it.** Merge the `console` repository's first pull request so its image publishes, then
    set `enabled: true` in `platform/deploy/console/values.yaml` and merge.
 
 ## 2. Move a project
