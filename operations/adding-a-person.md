@@ -58,5 +58,7 @@ project by editing `.graphite.yml` in their own repository; the registry sync va
 review. Hand-written person entries go through a reviewed pull request.
 
 **`main` rulesets.** Each platform repository blocks deletion and force-pushes on `main` and
-requires a squash-merged pull request with one approval. Organisation admins and the
-`graphite-deploy` app bypass it, so the registry sync, tag records and changelog keep pushing.
+requires a squash-merged pull request with one approval. Repository admins (organisation owners
+and `maintainers`) bypass it, and so does the `graphite-deploy` app on `platform`,
+`project-template`, `docs` and `graphite-hub`, so the registry sync, tag records and changelog keep
+pushing.

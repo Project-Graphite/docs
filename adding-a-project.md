@@ -56,7 +56,8 @@ they exist, a deploy stops with `waiting on secrets: …`.
 ## 7. Deploy and verify
 
 Merging the values deploys it: the containers start, the route is published and the hostname points
-at the VPS. Verify the site, persistence, background work and logs, then set `status: live` in
+at the VPS. For a static site, the recorded commit is built, uploaded to Cloudflare Pages and its
+hostname is pointed at the Pages project. Verify the site, persistence, background work and logs, then set `status: live` in
 `.graphite.yml` and add the outcome to its showcase.
 
 ## Checklist

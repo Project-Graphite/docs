@@ -32,6 +32,19 @@ them. **Deploy** also reads the `platform` variables `DEPLOY_URL`
 (`https://deploy.project-graphite.com`), `VPS_IPV4` (`135.125.254.59`), `CLOUDFLARE_ACCOUNT_ID`
 and `CLOUDFLARE_ZONE_ID`.
 
+## Creating the Cloudflare tokens
+
+Cloudflare → My Profile → API Tokens → Create Token → Custom token, both limited to the
+`project-graphite.com` zone:
+
+| Token | Permissions | Goes in |
+| :--- | :--- | :--- |
+| platform | Zone → DNS → Edit; Account → Cloudflare Pages → Edit | `CLOUDFLARE_API_TOKEN` in `platform`'s `production` environment |
+| certificate | Zone → Zone → Read; Zone → DNS → Edit | `secrets/edge.env` and the bootstrap command |
+
+The account and zone IDs, on the domain's overview page, are the `CLOUDFLARE_ACCOUNT_ID` and
+`CLOUDFLARE_ZONE_ID` variables in `platform`.
+
 ## Rotating
 
 - **A project value:** edit it, push, and **Apply** restarts the project.
