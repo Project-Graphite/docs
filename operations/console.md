@@ -6,11 +6,16 @@
 
 | Page | Owners | Contributors |
 | :--- | :--- | :--- |
-| Overview | host CPU, memory, swap, disk and 24h CPU; every project's containers with state, CPU, memory and image | their own projects' containers |
-| Container | usage history, details and networks, live logs, start, stop, restart, wake, a shell, its ports | usage history, details, live logs |
+| Overview | host CPU, memory, swap and disk; host usage charts; storage by images, volumes, container layers and build cache; one row per project with status, CPU, memory and storage, filterable and pinnable | their own projects |
+| Project | usage chart with a line per container; containers; images and volumes with sizes; wake | the same, without wake |
+| Container | usage chart, details and networks, live logs, start, stop, restart, wake, a shell, its ports | usage chart, details, live logs |
 | Images | every image, its size and users; remove dangling images | — |
 | Volumes | every volume, its project, size and whether it is in use | — |
 | Shell | a root shell on the VPS | — |
+
+Usage charts cover the last hour, 5 hours, day, 7 days or 30 days. Hover a chart for the time and
+every line's value; the line nearest the pointer is highlighted. Pins and the chosen range are kept
+in your browser.
 
 ## Ports
 
