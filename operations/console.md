@@ -12,6 +12,7 @@
 | Images | every image, its size and users; remove dangling images |
 | Volumes | every volume, its project, size and whether it is in use |
 | Shell | a root shell on the VPS |
+| Alerts | what needs attention now and what resolved in the last 7 days; see [monitoring.md](monitoring.md) |
 | Admin | owners only: every organisation member, when they last signed in, and their write access |
 | Docs | the handbook, rendered from the `docs` repository |
 
