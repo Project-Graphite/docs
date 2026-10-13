@@ -4,14 +4,14 @@
 
 Org → People → Invite member. Role **Member**, never Owner.
 
-The organisation base permission is `read`, so a new member can read every organisation
-repository, including private ones, and write to none until you grant it.
+The organisation base permission is `none`: a new member sees the public repositories, and private
+ones only through a team. Private repositories, such as `secrets`, are for owners only.
 
 ## 2. Add them to a team
 
 | Team | Gives | Use for |
 | :--- | :--- | :--- |
-| `contributors` | write through pull requests on `actions`, `platform`, `project-template`, `docs`, `.github`, `graphite-hub` | everyone |
+| `contributors` | write on `actions`, `platform`, `project-template`, `docs`, `.github`, `graphite-hub`; `main` takes only reviewed pull requests | everyone |
 | `maintainers` | admin on `actions`, `platform`, `project-template`, `.github`, `graphite-hub`, `docs` | people who own the platform with you |
 
 Add nearly everyone to `contributors`. `maintainers` is for someone you would trust to change how
@@ -52,8 +52,8 @@ repository cannot read organisation secrets, so its pipeline fails in a way that
 They can create public ones.
 
 **They cannot push to `main` on the platform repositories.** Contributors push branches and open
-pull requests. They register a project by editing `.graphite.yml` in their own repository; the
-registry sync validates it, then opens and merges the `platform` pull request without maintainer
+pull requests, and a maintainer approves them. They register a
+project by editing `.graphite.yml` in their own repository; the registry sync validates it, then opens and merges the `platform` pull request without maintainer
 review. Hand-written person entries go through a reviewed pull request.
 
 **`main` rulesets.** Each platform repository blocks deletion and force-pushes on `main` and

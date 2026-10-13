@@ -1,7 +1,7 @@
 # Project Graphite handbook
 
-Project Graphite is an organisation hub for member portfolios and project showcases. Static content
-runs on Cloudflare Pages; containerized demonstrations run through Coolify on one OVH VPS.
+Project Graphite is an organisation hub for member portfolios and project showcases. Static sites
+run on Cloudflare Pages; containerized projects run on one OVH VPS. `platform` deploys both.
 
 | Need | Read |
 | :--- | :--- |
@@ -9,12 +9,16 @@ runs on Cloudflare Pages; containerized demonstrations run through Coolify on on
 | Add a project | [adding-a-project.md](adding-a-project.md) |
 | Understand registry fields | [reference/registry.md](reference/registry.md) |
 | Understand hosting | [reference/hosting.md](reference/hosting.md) |
-| Prepare the OVH host | [operations/ovh-coolify.md](operations/ovh-coolify.md) |
-| Deploy Graphite Tracker | [operations/deploying-graphite-tracker.md](operations/deploying-graphite-tracker.md) |
+| Run the VPS | [operations/vps.md](operations/vps.md) |
+| Use the console | [operations/console.md](operations/console.md) |
+| Move off Coolify (clean start) | [operations/migrating-from-coolify.md](operations/migrating-from-coolify.md) |
+| Manage secrets | [operations/managing-secrets.md](operations/managing-secrets.md) |
+| Operate Graphite Tracker | [operations/graphite-tracker.md](operations/graphite-tracker.md) |
 | Add a member | [operations/adding-a-person.md](operations/adding-a-person.md) |
 | Retire a project | [operations/retiring-a-project.md](operations/retiring-a-project.md) |
+| Move to k3s later | [plans/k3s-transition.md](plans/k3s-transition.md) |
 | Review remaining recommendations | [recommendations.md](recommendations.md) |
 
-The `platform` repository holds people, image tags, deployment metadata and the project
-registry synced from each repository's `.graphite.yml`. Production Compose files live with their
-applications. Secret values never belong in Git.
+The `platform` repository holds people, the project registry, each project's production values,
+image tags, the core chart and the VPS edge. Secret values live only in the owners-only `secrets`
+repository.

@@ -74,8 +74,8 @@ The exception is anything load-bearing for a tool rather than a human: `# noqa`,
 
 Never in a repository. Not in code, config, commit messages, logs or a pull request description.
 
-The registry names sensitive environment variables a service needs; runtime values live in Coolify
-and build credentials live in GitHub secrets. Repositories that call `reusable-gitleaks.yml` scan
+A project's platform values name the secrets it needs; the values live in the owners-only `secrets`
+repository, and build credentials live in GitHub secrets. Repositories that call `reusable-gitleaks.yml` scan
 full history on every pull request, and a committed secret fails the check.
 
 If you commit one by accident, rotate it first and rewrite history second. Rewriting alone does not

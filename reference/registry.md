@@ -5,7 +5,8 @@ The `platform` repository holds the registry. `people/*.yml` drives member pages
 each repository's `.graphite.yml`, and an entry is edited by hand only for a repository without
 one, such as `graphite-hub`. The sync skips a repository whose manifest fails validation or declares
 a slug registered to another existing repository, leaves that repository's entries unchanged, and
-still syncs the rest. `tags/*.json` records immutable image tags.
+still syncs the rest. `tags/*.json` records the image or site build CI last published, and
+`deploy/<slug>/values.yaml` says how a project runs in production.
 
 ## Project fields
 
@@ -35,20 +36,26 @@ A repository's `.graphite.yml` lists its entries under `projects`, with every fi
 deploy:
   kind: compose
   host: example.project-graphite.com
-  source:
-    file: compose.production.yaml
-    service: api
-    port: 8000
-  secrets: [API_KEY, DATABASE_PASSWORD]
 ```
 
-`source.file` is the repository-relative production Compose file. `source.service` and
-`source.port` identify the single service Coolify exposes for the project hostname. `secrets`
-contains names only; values are entered directly in Coolify.
+The registry only names the host. The services, volumes, health checks, limits and secret names
+are in `platform/deploy/<slug>/values.yaml`; see the
+[platform README](https://github.com/project-graphite/platform#values).
 
-The Compose file is the runtime source of truth. It pulls prebuilt GHCR images, declares required
-variables, persists state in named volumes, defines service health checks, publishes no host ports,
-and caps CPU and memory for every long-running container.
+## Pages contract
+
+```yaml
+deploy:
+  kind: pages
+  host: example.project-graphite.com
+  source:
+    directory: site
+    output: dist
+    command: npm run build
+```
+
+**Deploy** runs `npm ci` and `command` (default `npm run build`) in `directory` at the recorded
+commit, and uploads `directory/output`.
 
 ## Person fields
 

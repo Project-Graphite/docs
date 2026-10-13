@@ -1,10 +1,10 @@
 # Hosting
 
-| Deployment kind | Runtime | Intended use |
+| Deployment kind | Runtime | Deployed by |
 | :--- | :--- | :--- |
-| `pages` | Cloudflare Pages | Hub and static sites |
-| `compose` | Coolify on the shared OVH VPS | APIs, databases, queues, and workers |
-| `none` | no runtime | libraries, archived work, and source-only projects |
+| `pages` | Cloudflare Pages, direct upload | platform **Deploy** builds the recorded commit |
+| `compose` | Docker Compose on the OVH VPS | platform **Deploy** renders `deploy/<slug>/values.yaml` |
+| `none` | nothing | — |
 
 ## Hostnames
 
@@ -15,25 +15,29 @@ project-graphite.com/members/<handle>     member portfolio
 project-graphite.com/projects/<slug>      project case study
 project-graphite.com/epics/<slug>         epic
 project-graphite.com/epics/<epic>/<slug>  project inside an epic
+deploy.project-graphite.com               the VPS deploy agent
+console.project-graphite.com              the console, behind Cloudflare Access
 ```
 
-Cloudflare Pages owns the Hub hostname. `compose` subdomains point to the VPS, where Coolify's proxy
-maps each hostname to the declared web service and internal port; `pages` subdomains are Cloudflare
-Pages custom domains. Database, queue, worker, and application ports are never published directly
-on the host.
+**Deploy** owns these DNS records. A `compose` host is a DNS-only A record to the VPS, or a proxied
+one when its values set `proxied: true`; a `pages` host is a proxied CNAME to `<slug>.pages.dev`. Hostnames stay one level below the apex so Cloudflare's
+universal certificate covers them.
 
-## Isolation
+## Routing
 
-Each project is a separate Coolify application with its own Compose network, environment values,
-containers, and volumes. All containers still share one Docker daemon and Linux kernel. Only
-trusted organisation projects belong on this VPS; stronger tenant isolation requires a separate
-host or managed runtime.
+Traefik listens on 80 and 443, redirects HTTP to HTTPS, gets each host's certificate from Let's
+Encrypt through a Cloudflare DNS challenge, and routes by host to the project's public service on
+the `edge` Docker network. No database, queue or app port is published on the host.
 
-## Capacity
+## Sleeping
 
-The initial 4 GB VPS can host Coolify and several small, low-traffic demonstrations when static
-frontends stay on Cloudflare Pages and images are built in GitHub Actions. Adding an always-on,
-database-heavy project requires reviewing actual memory, swap, disk, and failure impact first.
+A project with `sleep.after` in its values stops after that long without requests. The next request
+shows a waiting page while its containers start, in about half a minute. Bots and monitors get a
+plain `200` and do not wake it. `sleep.wake` adds a scheduled wake for projects with background
+jobs.
 
-See [../operations/ovh-coolify.md](../operations/ovh-coolify.md) for the exact user-run setup,
-deployment, backup, and cost boundaries.
+## Isolation and capacity
+
+Each project is its own Compose project with its own network and volumes, sharing one Docker daemon
+and kernel. Only trusted organisation projects belong here. Capacity is budgeted in
+`platform/deploy/host.yaml`; see [../operations/vps.md](../operations/vps.md#capacity).
