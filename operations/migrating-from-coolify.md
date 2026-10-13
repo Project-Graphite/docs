@@ -48,6 +48,9 @@ The project and site merges record fresh builds in `platform/tags/`.
    - Zero Trust → Access → Applications → Self-hosted `console.project-graphite.com`, GitHub
      login, Allow the organisation `Project-Graphite`. Copy its AUD tag.
    - Cloudflare → SSL/TLS: set the mode to **Full (strict)**, which the proxied console needs.
+5. **Lock the deploy app out of `secrets`.** Organisation settings → GitHub Apps → Graphite Deploy →
+   Configure → Only select repositories: every repository except `secrets` and `traceboard`. Add
+   each new repository there from now on.
 
 ## 4. Wipe the VPS
 
