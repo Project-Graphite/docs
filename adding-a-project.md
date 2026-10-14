@@ -62,7 +62,8 @@ app:
 ```
 
 Add `postgres: {}`, `redis: {}` or `backup: {}` to `core.yaml` for a database, a cache or daily
-backups; every service then gets the connection settings. Every option and default is in
+backups; every service then gets the connection settings. A service can also answer on more hostnames
+(`hosts`) and run commands on a schedule (`jobs`). Every option and default is in
 `platform/charts/core/values.yaml`, and the
 [platform README](https://github.com/project-graphite/platform#projects) explains the layout.
 `deploy/strata/` is a full example. **PR** renders it, checks it with Docker Compose, flags names in
