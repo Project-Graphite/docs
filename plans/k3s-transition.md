@@ -27,8 +27,8 @@ VPS-2 (6 vCPU, 12 GB) gives headroom. Either is a billing decision.
 
 | Piece | Today | After |
 | :--- | :--- | :--- |
-| `charts/core` | 1.x renders `compose.yaml` and a Traefik route | 2.x renders Deployments, Services, PersistentVolumeClaims, Jobs, CronJobs and an Ingress |
-| `deploy/<slug>/values.yaml` | unchanged | unchanged, apart from `core: 2.0.0` |
+| `charts/core` | 2.x renders `compose.yaml` and a Traefik route | 3.x renders Deployments, Services, PersistentVolumeClaims, Jobs, CronJobs and an Ingress |
+| `deploy/<slug>/` | unchanged | unchanged; `deploy/chart.yaml` moves to `3.0.0` |
 | `tags/<slug>.json` | read by `deploy.py` | the same file, passed as a values file by Argo CD |
 | Deploy | `deploy.py` posts to the deploy agent | Argo CD pulls `platform`; one Application per project with the chart from tag `core-v2.x` and values from `main` |
 | Secrets | **Apply** posts `secrets.env` to the deploy agent | the agent writes a Kubernetes Secret `<slug>` in namespace `<slug>`, or External Secrets Operator reads AWS SSM |

@@ -1,7 +1,7 @@
 # Graphite Tracker operations
 
 Production runs at `https://graphite-tracker.project-graphite.com` from
-`platform/deploy/graphite-tracker/values.yaml`. Every start applies pending Prisma migrations, so
+`platform/deploy/graphite-tracker/`. Every start applies pending Prisma migrations, so
 review migrations before merging to `main`.
 
 ## Values
@@ -67,7 +67,7 @@ sudo docker exec -it graphite-tracker-postgres-1 psql -U graphite -d graphite_tr
 1. Pick the last good `sha-…` tag.
 2. Check no migration blocks it: rolling back the image does not roll back the database. Images
    built before `20260927100000_user_roles` cannot run against a database that has it.
-3. Set `services.app.tag` in `platform/deploy/graphite-tracker/values.yaml` and merge.
+3. Set `app: {tag: sha-…}` in `platform/deploy/graphite-tracker/values.yaml` and merge.
 4. Remove the pin once the fix ships.
 
 ## Backups

@@ -7,7 +7,7 @@ or change. Each project's values in `platform` name the keys it needs; an owner 
 | :--- | :--- |
 | add or change a value | `sops edit <slug>.env` in `secrets`, commit, push |
 | apply a file again | `secrets` → Actions → **Apply** → Run workflow with the slug |
-| see which keys a project needs | `secrets:` and the `${NAME}` references in `platform/deploy/<slug>/values.yaml` |
+| see which keys a project needs | each service's `secrets` in `platform/deploy/<slug>/values.yaml`, plus `POSTGRES_PASSWORD` with `postgres` and `REDIS_PASSWORD` with `redis: {password: true}` |
 | see what the VPS has | `sudo cut -d= -f1 /srv/graphite/<slug>/secrets.env` |
 
 A push that changes `<slug>.env` decrypts it in **Apply**, writes

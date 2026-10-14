@@ -27,10 +27,12 @@ People edit `.graphite.yml` in their repository and the registry sync writes `pr
 automation edits `tags/<slug>.json`. A deploy cannot conflict with a person editing project
 metadata, and tag history remains a readable rollout record.
 
-## Production is a values file in platform
+## Production is a folder in platform
 
-Each project's production lives in `platform/deploy/<slug>/values.yaml`, written by contributors
-through reviewed pull requests, and the shared `core` chart renders it. Every project gets the same
+Each project's production lives in `platform/deploy/<slug>/`, `core.yaml` for what runs and
+`values.yaml` for its settings, written by contributors through reviewed pull requests, and the
+shared `core` chart renders it. The chart owns the defaults and the common components, PostgreSQL,
+Redis and backups, so a project writes only what is particular to it. Every project gets the same
 hardening, and a change to how all projects run is one chart release. Project repositories keep
 their code, Dockerfiles and local `compose.yaml`.
 

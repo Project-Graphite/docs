@@ -6,7 +6,7 @@ each repository's `.graphite.yml`, and an entry is edited by hand only for a rep
 one, such as `graphite-hub`. The sync skips a repository whose manifest fails validation or declares
 a slug registered to another existing repository, leaves that repository's entries unchanged, and
 still syncs the rest. `tags/*.json` records the image or site build CI last published, and
-`deploy/<slug>/values.yaml` says how a project runs in production.
+`deploy/<slug>/` says how a project runs in production.
 
 ## Project fields
 
@@ -40,8 +40,8 @@ deploy:
 ```
 
 The registry only names the host. The services, volumes, health checks, limits and secret names
-are in `platform/deploy/<slug>/values.yaml`; see the
-[platform README](https://github.com/project-graphite/platform#values).
+are in `platform/deploy/<slug>/core.yaml` and `values.yaml`; see the
+[platform README](https://github.com/project-graphite/platform#projects).
 
 ## Pages contract
 

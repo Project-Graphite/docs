@@ -1,8 +1,8 @@
 # The console
 
 `https://console.project-graphite.com` is the one place to look at and operate the VPS. Code:
-[`console`](https://github.com/project-graphite/console). Values:
-`platform/deploy/console/values.yaml`.
+[`console`](https://github.com/project-graphite/console). Production:
+`platform/deploy/console/`.
 
 | Page | Shows |
 | :--- | :--- |

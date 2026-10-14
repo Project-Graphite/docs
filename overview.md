@@ -8,7 +8,7 @@ as Docker Compose projects on one OVH VPS, served directly with Let's Encrypt.
 project push -> CI checks -> GHCR sha-<short> image -> platform tags/<slug>.json
                                                               |
 platform Deploy <---------------------------------------------+
-  |-> compose: render deploy/<slug>/values.yaml with the core chart
+  |-> compose: render deploy/<slug>/core.yaml + values.yaml with the core chart
   |            -> signed POST to the VPS deploy agent -> docker compose up --wait -> route -> DNS
   `-> pages:   build the recorded commit -> Cloudflare Pages
 
@@ -17,7 +17,7 @@ visitor -> VPS :443 -> Traefik -> project (Sablier wakes it if it sleeps)
 
 | Who | Changes | Where |
 | :--- | :--- | :--- |
-| a contributor | how a project runs | `platform/deploy/<slug>/values.yaml`, by pull request |
+| a contributor | how a project runs | `platform/deploy/<slug>/`, by pull request |
 | a contributor | what the Hub shows | the project's `.graphite.yml` |
 | CI | which build runs | `platform/tags/<slug>.json` |
 | an owner | secret values | the `secrets` repository |
