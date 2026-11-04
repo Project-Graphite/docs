@@ -9,7 +9,7 @@ Rotate it if it leaks, if it appears in a log, or on a schedule you are comforta
 
 ## What the app is
 
-| | |
+| | |`
 | :--- | :--- |
 | App ID | `4923055` |
 | Permissions | Contents: read and write. Pull requests: read and write. Metadata: read. |
