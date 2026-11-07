@@ -1,7 +1,8 @@
 # Project Graphite handbook
 
-Project Graphite is an organisation hub for member portfolios and project showcases. Static sites
-run on Cloudflare Pages; containerized projects run on one OVH VPS. `platform` deploys both.
+Project Graphite is an organisation hub for member portfolios and project showcases. The Hub and
+every containerized project run on one OVH VPS; one static site remains on Cloudflare Pages.
+`platform` deploys both.
 
 | Need | Read |
 | :--- | :--- |
@@ -24,8 +25,8 @@ run on Cloudflare Pages; containerized projects run on one OVH VPS. `platform` d
 | Move to k3s later | [plans/k3s-transition.md](plans/k3s-transition.md) |
 | Review remaining recommendations | [recommendations.md](recommendations.md) |
 
-The `platform` repository holds people, the project registry, each project's production values,
-image tags, the core chart and the VPS edge. Secret values live only in the owners-only `secrets`
-repository.
+The `platform` repository holds the project registry, each project's compose file and values, the
+shared fragments, the VPS edge and the backup service. Secret values live only in the console's
+store and on the VPS.
 
 The handbook is also readable in the console's **Docs** tab.
