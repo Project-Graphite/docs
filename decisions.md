@@ -8,10 +8,10 @@ registry, and CI publishes a matching immutable image for each one.
 
 ## Applications use subdomains; showcases use paths
 
-`atlas.project-graphite.com` is the application. `project-graphite.com/projects/atlas` describes it.
+`atlas.project-graphite.com` is the application. `project-graphite.com/atlas` describes it.
 Subdomains isolate browser cookies, storage, and service workers. VPS hosts get Let's Encrypt
-certificates from Traefik. Cloudflare's certificate only matters for proxied hosts, the console and
-the Pages sites, and hostnames stay one level below the apex so its standard coverage is sufficient.
+certificates from Traefik. Cloudflare's certificate only matters for proxied hosts, the apex and
+the console, and hostnames stay one level below the apex so its standard coverage is sufficient.
 
 ## Public code, including the control plane
 
@@ -21,70 +21,75 @@ Actions-minute limits, lets organisation secrets reach every repository on the f
 `main` rulesets available, so contributors work through reviewed pull requests. `platform` holds
 deployment topology but no secrets.
 
-## Human registry data and deployment tags are separate
+## The registry of record is platform; the Hub reads it and writes back
 
-People edit `.graphite.yml` in their repository and the registry sync writes `projects/<slug>.yml`;
-automation edits `tags/<slug>.json`. A deploy cannot conflict with a person editing project
-metadata, and tag history remains a readable rollout record.
+People edit `.graphite.yml` in their repository and the registry sync writes
+`projects/<slug>.yml`, validated with the one JSON schema in `platform`. The Hub reads those
+files on a webhook, validates them with the same schema, and commits a registry edit made on the
+Hub back into the repository's `.graphite.yml` through the platform GitHub App. One definition of a
+project, two readers that cannot disagree. Presentation, such as covers, accents and feature slots,
+lives only in the Hub.
 
-## Production is a folder in platform
+## Production is a folder in platform, written as plain Compose
 
-Each project's production lives in `platform/deploy/<slug>/`, `core.yaml` for what runs and
-`values.yaml` for its settings, written by contributors through reviewed pull requests, and the
-shared `core` chart renders it. The chart owns the defaults and the common components, PostgreSQL,
-Redis and backups, so a project writes only what is particular to it. Every project gets the same
-hardening, and a change to how all projects run is one chart release. Project repositories keep
-their code, Dockerfiles and local `compose.yaml`.
+Each project's production lives in `platform/deploy/<slug>/`: a `compose.yaml` that extends the
+fragments in `shared/`, and a `values` file holding `IMAGE_TAG` and only what differs from a
+default. The fragments own the hardening, limits, health checks, PostgreSQL and Redis, so a project
+writes only what is particular to it, and a change to how every project runs is one edit to
+`shared/`. `docker compose config` is the renderer and the validator; there is no chart, no merge
+of two files and no compile step. Project repositories keep their code, Dockerfiles and local
+`compose.yaml`.
 
 ## Platform deploys everything; Coolify is retired
 
-The platform **Deploy** workflow renders values with Helm into a Docker Compose project and applies
-it through a signed request to a small deploy agent on the VPS, and builds static sites into Cloudflare Pages. Git holds the
-whole desired state, a deploy is a merge, and a rollback is a pinned tag. Coolify kept a second copy
-of that state in its own database and UI. Helm renders Compose today so the same values can move to
-a k3s cluster later; see [plans/k3s-transition.md](plans/k3s-transition.md).
+The platform **Deploy** workflow renders the project and applies it through a signed request to a
+small deploy agent on the VPS, and builds the remaining static site into Cloudflare Pages. Git
+holds the whole desired state, a deploy is a merge, and a rollback is editing `IMAGE_TAG` back.
+Coolify kept a second copy of that state in its own database and UI.
 
-## Secrets are owners-only
+## CI writes the image tag into the values
 
-Secret values are SOPS-encrypted in the private `secrets` repository, which only organisation
-owners can see, and its **Apply** workflow writes them to the VPS. Anyone can write values; only an
-owner can supply what they reference. Owners are the deliberate bottleneck, the way an operations
-team owns a parameter store.
+A project's CI publishes `sha-<short>` images only after its checks pass, then commits
+`IMAGE_TAG=sha-<short>` into `platform/deploy/<slug>/values`. The deploy runs from that line, so
+it always runs exactly the image CI built, and an automated push may change nothing else.
 
-## Traffic goes straight to the VPS
+## Secrets live in the console
 
-Visitors reach Traefik on the VPS directly, with Let's Encrypt certificates. CI deploys by posting
-signed requests to the deploy agent, so SSH stays open only to the owner's address. Of the VPS
-hosts, only the console, which is root on the box, sits behind Cloudflare's proxy and Access.
+Secret values are encrypted in the console's own SQLite, edited on its Secrets page by owners and
+by members granted a project, and written to `/etc/graphite/<slug>.env` on the VPS, which
+`docker compose` reads at rollout. They never transit CI or the deploy payload: a compose file
+names a secret as `${NAME:?}`, and the agent refuses a rollout whose names are missing. The
+`secrets` repository, SOPS and its Apply workflow are retired. The console concentrates the risk
+where it already is: behind Cloudflare Access, signed in with GitHub, root on the host.
 
-## Idle demonstrations sleep
+## The apex and the console go through Cloudflare; everything else goes straight to the VPS
 
-A project can sleep: Sablier stops it after a period without requests and starts it on the next
-one. This keeps occasional demos from holding memory on a small host. Projects with scheduled work
-stay awake or set a scheduled wake.
+Visitors reach Traefik on the VPS directly, with Let's Encrypt certificates, except for the Hub at
+the apex and the console. The Hub is proxied for DDoS absorption, the WAF, caching of covers and
+share images, and the country header its visitor map needs; the console for Access. CI deploys by
+posting signed requests to the deploy agent, so SSH stays open only to the owner's address.
 
-## Static work stays off the VPS
+## Graphite Hub is a server
 
-Graphite Hub and static project frontends remain on Cloudflare Pages. GitHub Actions builds dynamic
-service images. This reserves the 4 GB VPS for APIs, SSR processes, workers, PostgreSQL, and Redis.
+Reverses "Graphite Hub is prerendered" and "Static work stays off the VPS". A static site could
+not carry member-edited profiles, a blog written in the browser, or live state. The Hub is one
+Node process on the VPS: React Router on Express, SQLite for everything durable, Redis for
+everything ephemeral, one replica, no staging. The cost accepted: the apex depends on the VPS, and
+a Hub release causes a gap of seconds.
 
 ## Every long-running container has a resource ceiling
 
-Every service in a project's values sets a memory limit and reserve, and **PR** checks that the
-reserves fit the VPS budget. Limits keep one idle demonstration from consuming the server; actual
-memory, swap, disk and OOM events remain the capacity signals.
+Every service in a project's compose file sets a memory limit and reserve, and **PR** checks that
+the reserves fit the VPS budget. Limits keep one idle demonstration from consuming the server;
+actual memory, swap, disk and OOM events remain the capacity signals.
 
-## Application deployment follows successful CI
+## Backups are shared, verified and importable
 
-A project's CI publishes `sha-<short>` images only after its checks pass, then records the tag in
-`platform`. The deploy runs from that record, so it always runs exactly the image CI built, and
-values can pin an older tag to roll back.
-
-## Graphite Hub is prerendered
-
-Every route becomes a real HTML file. Deep links and per-page metadata work on a static host, and
-unknown paths return a genuine 404. React is retained for contributor familiarity; prerendering
-recovers the important static-site properties.
+One backup service on the VPS covers every project that labels a PostgreSQL container or a volume,
+nightly, kept 14 days. Every archive is reopened and checked after it is written, and a failed
+check raises a console alert, so a silent bad backup cannot exist. The console's Backups page
+downloads, runs and imports archives; the download is the manual off-site path. Scheduled restore
+drills were declined in favour of the built-in verification and the import action.
 
 ## Archived projects remain visible
 

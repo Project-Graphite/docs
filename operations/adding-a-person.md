@@ -2,10 +2,11 @@
 
 ## 1. Invite them to the organisation
 
-Org → People → Invite member. Role **Member**, never Owner.
+Org → People → Invite member. Role **Member**, never Owner: an organisation owner is the Hub's
+owner too, and can edit, unpublish or delete anything there.
 
 The organisation base permission is `none`: a new member sees the public repositories, and private
-ones only through a team. Private repositories, such as `secrets`, are for owners only.
+ones only through a team.
 
 ## 2. Add them to a team
 
@@ -25,22 +26,24 @@ person directly, or a small team if several people share one project.
 They get **write on their own project repository**, plus the platform repositories through
 `contributors`. Read everywhere else.
 
-## 4. Their registry entry is created for them
+## 4. Their page appears on the Hub
 
-The next registry sync creates `platform/people/<lowercase-login>.yml` with `profile: github` and
-fills `name`, `headline` and `links` from their GitHub profile. It refreshes them on every later
-sync. The sync runs on any `.graphite.yml` push in the organisation, or by hand from
-`platform` → Actions → **Sync registry**.
+The Hub syncs the organisation's members from GitHub every hour and on the membership webhook, so
+`project-graphite.com/members/<login>` exists within minutes with their GitHub name and avatar,
+the projects they own and the projects that credit their username. Nothing is written by hand.
 
-To write their profile by hand instead, they set `profile: manual` and edit the file on a
-branch of `platform`, changing only `people/<handle>.yml`, then open a pull request for a
-maintainer to approve.
-`bio` and `stack` are always written by hand. See [../reference/registry.md](../reference/registry.md).
+They sign in on the Hub with `?graphite` on any page, then edit their page at
+`/members/<login>/edit`: an alias, which gives them `project-graphite.com/<alias>`, headline, bio,
+accent, avatar, cover, the blocks in their order, and short links. They can also write posts and
+edit the presentation and registry fields of the projects they own.
 
-Their page includes projects they maintain and projects that credit their GitHub username as an
-author.
+## 5. Give them console access, if they operate something
 
-## 5. Point them at the documentation
+Every member reads every console page except Admin, Secrets and Backups. On the console's Admin
+page an owner grants, per member, operating a project, that project's secrets, images, the host
+shell, or everything. See [console.md](console.md).
+
+## 6. Point them at the documentation
 
 - [../adding-a-project.md](../adding-a-project.md) — the walkthrough
 - [../reference/conventions.md](../reference/conventions.md) — naming, PR titles, what goes where
@@ -53,12 +56,16 @@ repository cannot read organisation secrets, so its pipeline fails in a way that
 They can create public ones.
 
 **They cannot push to `main` on the platform repositories.** Contributors push branches and open
-pull requests, and a maintainer approves them. They register a
-project by editing `.graphite.yml` in their own repository; the registry sync validates it, then opens and merges the `platform` pull request without maintainer
-review. Hand-written person entries go through a reviewed pull request.
+pull requests, and a maintainer approves them. They register a project by editing `.graphite.yml`
+in their own repository; the registry sync validates it, then opens and merges the `platform` pull
+request without maintainer review.
 
 **`main` rulesets.** Each platform repository blocks deletion and force-pushes on `main` and
 requires a squash-merged pull request with one approval. Repository admins (organisation owners
 and `maintainers`) bypass it, and so does the `graphite-deploy` app on `platform`,
-`project-template`, `docs` and `graphite-hub`, so the registry sync, tag records and changelog keep
+`project-template`, `docs` and `graphite-hub`, so the registry sync and the image tag records keep
 pushing.
+
+**Removing a member** from the organisation signs them out of the Hub within a second and takes
+their page down on the next sync. Their posts and the versions of what they edited stay in the
+Hub's database.
