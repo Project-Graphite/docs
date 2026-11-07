@@ -4,7 +4,9 @@ Production runs at `https://graphite-tracker.project-graphite.com` from
 `platform/deploy/graphite-tracker/`. Every start applies pending Prisma migrations, so
 review migrations before merging to `main`.
 
-## Values
+## Secrets
+
+Entered in the console under `/graphite-tracker/`; see [managing-secrets.md](managing-secrets.md).
 
 | Name | Value | Required |
 | :--- | :--- | :--- |
@@ -21,14 +23,13 @@ review migrations before merging to `main`.
 | `RAWG_API_KEY` | RAWG key | when `GAME_SOURCE` is `rawg` |
 | `DISABLED_SOURCES` | comma-separated source IDs | no |
 
-They live in `secrets/graphite-tracker.env`; see [managing-secrets.md](managing-secrets.md).
 Rotating `AUTH_ACCESS_TOKEN_SECRET` signs everyone out and breaks every unsubscribe link already
-sent.
+sent. A changed value takes effect on Redeploy.
 
 ## Gmail sender
 
-`projectgraphite.org@gmail.com` is the shared sender; each project uses its own display name.
-Gmail SMTP needs an app password:
+`projectgraphite.org@gmail.com` is the shared sender; each project uses its own display name, and
+the Hub's subscriptions send from it too. Gmail SMTP needs an app password:
 
 1. Sign in as `projectgraphite.org@gmail.com` and turn on 2-Step Verification.
 2. Open [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords), create one
@@ -67,10 +68,13 @@ sudo docker exec -it graphite-tracker-postgres-1 psql -U graphite -d graphite_tr
 1. Pick the last good `sha-…` tag.
 2. Check no migration blocks it: rolling back the image does not roll back the database. Images
    built before `20260927100000_user_roles` cannot run against a database that has it.
-3. Set `app: {tag: sha-…}` in `platform/deploy/graphite-tracker/values.yaml` and merge.
-4. Remove the pin once the fix ships.
+3. Set `IMAGE_TAG=sha-…` in `platform/deploy/graphite-tracker/values` and merge, or use the
+   release control on the console's Project page.
+4. The next push to the tracker's `main` overwrites the pin.
 
 ## Backups
 
-There is no database backup yet. Add one, like Strata's `backup` service, and test a restore before
-inviting real users.
+The database container extends `shared/postgres.yaml`, which labels it for the nightly backup, so
+a verified `pg_dump` lands under `/var/lib/graphite/backups/graphite-tracker/` every night and is
+listed on the console's Backups page. Redis holds only the queue and is not backed up. Import one
+archive from the Backups page once before inviting real users.

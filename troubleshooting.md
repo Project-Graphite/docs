@@ -8,8 +8,8 @@ fix. Most of them present with an error pointing somewhere other than the proble
 ## A container is repeatedly restarting or reports OOMKilled
 
 Inspect `sudo docker compose -p <slug> logs --tail 100 <service>`, `sudo docker stats --no-stream`
-and `free -h`. Stop an unused demonstration before considering a resize. Do not raise a service limit or
-resize the VPS without actual usage evidence, the exact recurring price, and approval.
+and `free -h`, or the console's Logs page and usage charts. Do not raise a service limit or resize
+the VPS without actual usage evidence, the exact recurring price, and approval.
 
 ## A container reports an image pull error
 
@@ -19,19 +19,20 @@ the values.
 
 ## A project is healthy internally but the hostname fails
 
-Check, in order: the route file `/srv/graphite/edge/routes/<slug>.yml` exists and names the public
-service's `port`; `sudo docker logs edge-traefik-1` shows no route or certificate error; the
-hostname is a DNS-only A record to `135.125.254.59` in Cloudflare, proxied only for the console.
-Rerunning **Deploy** for the project rewrites the route and the DNS record.
+Check, in order: the route file `/srv/graphite/edge/routes/<slug>.yml` exists and names the
+service that joins the `edge` network as the slug; `sudo docker logs edge-traefik-1` shows no route
+or certificate error; the hostname is a DNS-only A record to `135.125.254.59` in Cloudflare,
+proxied only for the apex and the console. Rerunning **Deploy** for the project rewrites the route
+and the DNS record.
 
 ## A host serves "TRAEFIK DEFAULT CERT"
 
 **Cause.** Traefik could not get a Let's Encrypt certificate because the certificate token lacks
 Zone → Zone → Read. It needs that and Zone → DNS → Edit on `project-graphite.com`.
 
-**Fix.** Fix the token's permissions or create a new one. Update `CF_DNS_API_TOKEN` in
-`secrets/edge.env` and push, and **Apply** re-applies the edge; or edit
-`/srv/graphite/edge/secrets.env` on the VPS and run:
+**Fix.** Fix the token's permissions or create a new one. Save it as `/edge/CF_DNS_API_TOKEN` on
+the console's Secrets page, or edit the edge's env file on the VPS, then run **Deploy** with
+`edge`, or on the VPS:
 
 ```sh
 sudo -u deploy /srv/graphite/bin/graphite-up edge
@@ -39,16 +40,36 @@ sudo -u deploy /srv/graphite/bin/graphite-up edge
 
 ## Deploy fails with "waiting on secrets"
 
-**Cause.** A name in the project's `secrets:` is missing from `/srv/graphite/<slug>/secrets.env`.
+**Cause.** A `${NAME:?}` in the project's compose file has no value in
+`/etc/graphite/<slug>.env`. The agent refused before touching anything; the running deployment is
+unchanged.
 
-**Fix.** An owner adds it to `secrets/<slug>.env` and pushes; **Apply** writes it, then rerun
-**Deploy** for the project.
+**Fix.** An owner enters the name under `/<slug>/` on the console's Secrets page, which rewrites
+the file at once; then rerun **Deploy** for the project. The Secrets page flags the missing names
+as **required by compose, missing**.
 
-## Deploy fails with "core x.y.z is not released"
+## A project shows "needs redeploy" and keeps showing it
 
-**Cause.** The values pin a chart version that has no `core-v<version>` tag yet.
+**Cause.** A secret changed after the project's last rollout; the running containers still have
+the old value.
 
-**Fix.** Merge the chart change to `main` first; **Deploy** tags the version on its first push.
+**Fix.** Press Redeploy on the Project page, or rerun **Deploy** for the project. The hint clears
+once a rollout finishes after the change.
+
+## The console's Secrets page answers 503
+
+**Cause.** `SECRETS_KEY` is missing from `/etc/graphite/console.env`, or the console was started
+with a key that cannot open a stored version (the log names the key id).
+
+**Fix.** Put the key back, or `SECRETS_KEY=<new>,<old>` during a rotation, and redeploy the
+console.
+
+## PR fails with "repeats its default; remove the line"
+
+**Cause.** A `values` line equals the `${NAME:-default}` in `shared/` or the project's compose
+file. `check-values.py` refuses it, so a default is declared once.
+
+**Fix.** Delete the line.
 
 ## A static site deploy says the Pages project is connected to Git
 
@@ -58,19 +79,27 @@ direct-upload projects, so this happens only if someone recreates one by hand co
 **Fix.** Delete it in Cloudflare → Workers & Pages and rerun **Deploy** for the site, which creates a
 direct-upload project with the same name.
 
-## A sleeping project keeps waking
+## The Hub's webhook deliveries all get 404
 
-Something keeps requesting it. Bots and monitors whose user agent says so are ignored.
-`sudo docker logs edge-sablier-1` shows when sessions start; to see the caller, add `accessLog: {}`
-to `platform/edge/traefik.yml` for a while, then add its user agent pattern to `ignoreUserAgent` in
-the core chart's route template.
+**Symptom.** GitHub's webhook page shows every delivery answered 404, the Hub's
+`webhook_deliveries` table is empty, and registry or release changes only appear on the hourly
+sync.
 
-## A sleeping project never sleeps
+**Cause.** The Hub answers 404 to any delivery whose signature does not verify: the secret on the
+organisation webhook differs from `/graphite-hub/GITHUB_WEBHOOK_SECRET`, or the latter was changed
+without a redeploy.
 
-**Cause.** An open browser tab polling it renews its session with every request.
+**Fix.** Set the same secret on both sides, redeploy the Hub, and redeliver one delivery from
+GitHub's webhook page; it should answer 202.
 
-**Fix.** Look for repeating requests in the public service's logs, for example
-`sudo docker logs graphite-message-lab-web-1`, and close the tab making them.
+## A rollout report records healthStatus 403
+
+**Cause.** `graphite-report` probes the project's host after a rollout. A host behind Cloudflare
+Access, such as the console, answers 403 to it; that is Access, not the project. (The Hub's apex
+once answered 403 too, until the report script sent a named user agent.)
+
+**Fix.** None needed for Access-protected hosts. For anything else, check the Cloudflare WAF and
+the user agent in `host/graphite-report`.
 
 ## A workflow run fails with no jobs and no log
 
@@ -80,7 +109,7 @@ download, and the workflow name in the Actions list shows as the file path inste
 That last detail is the tell: **GitHub could not parse or resolve the workflow**, so it never got
 as far as reading the name. It is a startup failure, not a runtime one.
 
-Two causes, and `actionlint` catches neither.
+Three causes, and `actionlint` catches none of them.
 
 ### Cause 1: the caller did not grant the permissions the called workflow needs
 
@@ -109,7 +138,13 @@ otherwise read private workflow logs.
 This is why `actions` is public and must stay public. Project repositories are public, so the
 workflows they call must be too.
 
-**How to isolate either one:** add several small probe workflows in one push, each testing a single
+### Cause 3: the called workflow no longer exists
+
+`reusable-sync-registry.yml` was removed from `actions` when the Hub's webhook took over the
+dispatch. A repository that still has a `registry.yml` calling it fails this way on every
+`.graphite.yml` push. Delete the workflow; the sync runs without it.
+
+**How to isolate any of them:** add several small probe workflows in one push, each testing a single
 element. A startup failure in one file does not affect the others, so one push gives you several
 answers at once.
 
@@ -131,7 +166,7 @@ gh secret set PLATFORM_APP_PRIVATE_KEY --repo project-graphite/<repository> < ke
 ```
 
 Public repositories pick up organisation secrets automatically, which is why every repository
-except `traceboard` and the owners-only `secrets` is public and members cannot create private ones.
+except `traceboard` is public and members cannot create private ones.
 
 ---
 
@@ -143,9 +178,10 @@ exist.
 **Cause.** Working as intended. A repository cannot deploy until it is registered.
 
 **Fix.** Add an entry with the repository's slug to its `.graphite.yml` and push it to `main`; the
-registry sync writes `projects/<slug>.yml`. If the repository's `Registry` workflow fails instead,
-its `Validate .graphite.yml` step lists what to fix. Until then builds and checks still run and only
-the record step is blocked, deliberately, so a new repository does not silently do nothing.
+Hub's webhook dispatches the registry sync, which writes `projects/<slug>.yml`. If the sync skips
+the manifest instead, the **Sync registry** run in `platform` lists what to fix. Until then builds
+and checks still run and only the record step is blocked, deliberately, so a new repository does
+not silently do nothing.
 
 ---
 
@@ -213,7 +249,7 @@ git show HEAD:path/to/script.sh | file -
 
 ---
 
-## Every URL on the site returns 200, including nonsense
+## Every URL on a Pages site returns 200, including nonsense
 
 **Symptom.** Any path at all returns HTTP 200 and renders the home page.
 
@@ -221,26 +257,9 @@ git show HEAD:path/to/script.sh | file -
 `404.html` in the build output. Search engines then index every garbage URL as a real page, and
 broken links never surface as broken.
 
-**Fix.** Ship a `404.html`. Graphite Hub has one in `site/public/`, so it lands in `dist/`.
-
-Verify with a request to a path that cannot exist; it should return 404, and the root should still
-return 200.
-
----
-
-## A deep link works locally but 404s when deployed, or the reverse
-
-**Cause.** `vite preview` does SPA fallback: it serves `index.html` for any path. Cloudflare Pages
-serves directory index files instead. They disagree, so local testing lies.
-
-**Fix.** Test the built output with a plain static server that behaves like Pages:
-
-```sh
-cd dist && python -m http.server 4173
-```
-
-Graphite Hub does not rely on SPA fallback at all. Every route is prerendered to a real file, so
-deep links are real files and unknown paths genuinely miss.
+**Fix.** Ship a `404.html` in the build output. Verify with a request to a path that cannot exist;
+it should return 404, and the root should still return 200. Test the built output with a plain
+static server rather than `vite preview`, which serves `index.html` for any path and so lies.
 
 ---
 
@@ -249,8 +268,7 @@ deep links are real files and unknown paths genuinely miss.
 **Cause.** `deploy.source.directory` in the project's `.graphite.yml` does not name the folder that
 holds `package.json`.
 
-**Fix.** Set it to that folder — `site` for Graphite Hub. `output` is relative to it, so it stays
-`dist`, not `site/dist`.
+**Fix.** Set it to that folder. `output` is relative to it, so it stays `dist`, not `site/dist`.
 
 ---
 
@@ -263,15 +281,24 @@ Also check you are in Account Home rather than the zone — Bulk Redirects are a
 
 ---
 
-## The site shows an empty page to a crawler
+## Every action on the Hub answers 400 after a deploy
 
-**Symptom.** Fetching the page without JavaScript shows an empty root element and nothing else.
+**Cause.** React Router's action handler compares the request's origin with the page's, and
+behind Traefik the request arrives as `http`. The Hub sets Express's `trust proxy` for loopback
+and private addresses so the forwarded scheme is used; a change that drops it brings this back.
 
-**Cause.** A client-rendered SPA. Everything is in the JavaScript bundle.
+**Fix.** Keep `app.set('trust proxy', 'loopback, uniquelocal')` in `server/app.ts`.
 
-**Fix.** Graphite Hub prerenders every route at build time with `react-dom/server`. If this
-reappears, `scripts/prerender.mjs` did not run — check the build script still chains all three
-steps: client build, SSR build, prerender.
+---
+
+## The Hub image starts and never becomes ready
+
+**Cause.** The server imports modules from `app/` at runtime, not only from `build/`. An image that
+copies `build/` and `server/` but not `app/` throws on start and never answers `/health/ready`, so
+the agent's `--wait` times out and the apex keeps serving the previous container.
+
+**Fix.** The Dockerfile copies `app/`, and the **Image starts** job in CI runs the image against a
+Redis until `/health/ready` answers, so this cannot reach `main` again.
 
 ---
 

@@ -7,12 +7,14 @@
 | Repository | lowercase, hyphenated | `game-forge` |
 | Slug | equals the repository name, except for an epic's child projects | `game-forge` |
 | Service folder | lowercase, describes its role | `frontend`, `server`, `worker` |
-| Person handle | lowercase, short, memorable | `amr` |
+| Member alias | lowercase, short, memorable; chosen on the Hub, never equal to a slug | `amr` |
 | Hostname | one label below `project-graphite.com`, usually the slug | `game-forge.project-graphite.com` |
 | Image | `ghcr.io/project-graphite/<repo>/<service>` | `.../game-forge/server` |
+| Secret | `/<project>/<NAME>`, capitals and underscores | `/strata/DATABASE_URL` |
 
-The slug is the URL segment and, for top-level projects, the repository name. Renaming it later
-means renaming the repository, breaking image names and invalidating links. Choose once.
+The slug is the URL segment, `project-graphite.com/<slug>`, and, for top-level projects, the
+repository name. Renaming it later means renaming the repository, breaking image names and
+invalidating links. Choose once.
 
 Service folders are named for what they are, not what they use. `server`, not `nestjs`.
 
@@ -40,7 +42,8 @@ fix(topology): stop single-service diagrams scaling up
 chore: bump vite to 8.0.16
 ```
 
-Merges are squashed and **the PR title becomes the commit message on `main`**.
+Merges are squashed and **the PR title becomes the commit message on `main`**. The changelog
+reads those titles: `feat` is a minor version, `fix` a patch, `!` or `BREAKING CHANGE` a major.
 
 ## Pull request size
 
@@ -74,9 +77,10 @@ The exception is anything load-bearing for a tool rather than a human: `# noqa`,
 
 Never in a repository. Not in code, config, commit messages, logs or a pull request description.
 
-A project's platform values name the secrets it needs; the values live in the owners-only `secrets`
-repository, and build credentials live in GitHub secrets. Repositories that call `reusable-gitleaks.yml` scan
-full history on every pull request, and a committed secret fails the check.
+A project's compose file in `platform` names the secrets it needs as `${NAME:?}`; the values are
+entered in the console and live only there and on the VPS, and build credentials live in GitHub
+secrets. Repositories that call `reusable-gitleaks.yml` scan full history on every pull request,
+and a committed secret fails the check.
 
 If you commit one by accident, rotate it first and rewrite history second. Rewriting alone does not
 help: it is already in the reflog, in forks and in anything that cloned it.
@@ -90,8 +94,8 @@ The six platform repositories (`platform`, `actions`, `project-template`, `docs`
 else. Their `main` rulesets also block deletion and force-pushes. Admins bypass them, and so does
 the `graphite-deploy` app where automation pushes. CODEOWNERS requests review from
 `@project-graphite/maintainers` on `platform`, `actions`, and the `.github/` folders of
-`graphite-hub` and `project-template`, plus graphite-hub's `site/src/data/`; it does not block a
-merge. Registry-sync pull requests on `platform` merge automatically once validation passes.
+`graphite-hub` and `project-template`; it does not block a merge. Registry-sync pull requests on
+`platform` merge automatically once validation passes.
 
 ## What belongs where
 
@@ -99,10 +103,10 @@ merge. Registry-sync pull requests on `platform` merge automatically once valida
 | :--- | :--- |
 | Project code | that project |
 | How every project is built or checked | `actions` |
-| What a project is | that project's `.graphite.yml`, synced into `platform` |
-| How it is deployed, its production values | `platform/deploy/<slug>/core.yaml` and `values.yaml`, by pull request |
-| Its secret values | the owners-only `secrets` repository, added by an owner |
-| How the site looks | `graphite-hub` |
+| What a project is | that project's `.graphite.yml`, synced into `platform`; six fields can also be edited on the Hub, which commits to that file |
+| How it is deployed, its production settings | `platform/deploy/<slug>/compose.yaml` and `values`, by pull request |
+| Its secret values | the console's Secrets page, by an owner or a member granted that project |
+| How the site looks and what members write on it | `graphite-hub` for the code; `/admin` and each member's editor for the content |
 | How the organisation works | `docs` |
 
 If you are editing a workflow inside a project repository, stop. It almost certainly belongs in
