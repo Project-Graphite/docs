@@ -30,10 +30,10 @@ deploy:
   host: my-project.project-graphite.com
 ```
 
-Push to `main`. The Hub sees the push through the organisation webhook and asks `platform` to
-sync; **Sync registry** validates the manifest, writes `projects/<slug>.yml` and merges it. The
-project is on the Hub within minutes, and from then on its name, summary, tags, status, pinned and
-listed can also be edited on the Hub, which commits them back into `.graphite.yml`.
+Push to `main`. `platform`'s **Sync registry** runs every hour, and sooner when the Hub's webhook
+sees the push and dispatches it; it validates the manifest, writes `projects/<slug>.yml` and merges
+it. The project is on the Hub within the hour, and from then on its name, summary, tags, status,
+pinned and listed can also be edited on the Hub, which commits them back into `.graphite.yml`.
 
 ## 4. Publish images
 

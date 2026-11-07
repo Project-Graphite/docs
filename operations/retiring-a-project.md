@@ -12,7 +12,7 @@ deploy:
   kind: none
 ```
 
-Push it to `main`; the Hub's webhook dispatches the registry sync, which rewrites
+Push it to `main`; the registry sync, hourly or when the Hub's webhook dispatches it, rewrites
 `platform/projects/<slug>.yml`, and the Hub stops probing the host. Keep the repository, authors
 and showcase; the project stays on the Hub as archived, with its releases.
 
