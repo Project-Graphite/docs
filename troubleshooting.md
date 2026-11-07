@@ -142,7 +142,8 @@ workflows they call must be too.
 
 `reusable-sync-registry.yml` was removed from `actions` when the Hub's webhook took over the
 dispatch. A repository that still has a `registry.yml` calling it fails this way on every
-`.graphite.yml` push. Delete the workflow; the sync runs without it.
+`.graphite.yml` push. Delete the workflow; the sync runs every hour without it, and sooner when
+the Hub's webhook dispatches it.
 
 **How to isolate any of them:** add several small probe workflows in one push, each testing a single
 element. A startup failure in one file does not affect the others, so one push gives you several
@@ -178,7 +179,7 @@ exist.
 **Cause.** Working as intended. A repository cannot deploy until it is registered.
 
 **Fix.** Add an entry with the repository's slug to its `.graphite.yml` and push it to `main`; the
-Hub's webhook dispatches the registry sync, which writes `projects/<slug>.yml`. If the sync skips
+registry sync, hourly or when the Hub's webhook dispatches it, writes `projects/<slug>.yml`. If the sync skips
 the manifest instead, the **Sync registry** run in `platform` lists what to fix. Until then builds
 and checks still run and only the record step is blocked, deliberately, so a new repository does
 not silently do nothing.
