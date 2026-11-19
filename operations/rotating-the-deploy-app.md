@@ -2,8 +2,7 @@
 
 The `graphite-deploy` GitHub App lets CI write `IMAGE_TAG` into `platform` and tag releases, the
 registry sync read every repository's `.graphite.yml` and merge its pull request, the Hub read the
-organisation and commit registry edits back into `.graphite.yml`, and the console release a tag
-from its Project page. It is installed on every organisation repository, so its private key is the
+organisation and dispatch the registry sync, and the console release a tag from its Project page. It is installed on every organisation repository, so its private key is the
 most sensitive credential in the organisation: it can commit to any of them.
 
 Rotate it if it leaks, if it appears in a log, or on a schedule you are comfortable with.
@@ -24,7 +23,7 @@ The App ID is not secret — it is public installation metadata. The private key
 | Copy | Used for |
 | :--- | :--- |
 | organisation secrets `PLATFORM_APP_CLIENT_ID` and `PLATFORM_APP_PRIVATE_KEY` | every workflow: the deploy record, the changelog, **PR** and **Sync registry** in `platform` |
-| `/graphite-hub/PLATFORM_APP_CLIENT_ID` and `PLATFORM_APP_PRIVATE_KEY` in the console's store | the Hub's reads of the registry, members and releases, and write-back |
+| `/graphite-hub/PLATFORM_APP_CLIENT_ID` and `PLATFORM_APP_PRIVATE_KEY` in the console's store | the Hub's reads of the registry, members and releases, and its dispatch of **Sync registry**; the Hub writes to no repository |
 | `PLATFORM_APP_*` in `/etc/graphite/console.env` | releases and `ENABLED` from the console's Project page; optional |
 
 Every public repository inherits the organisation secrets. On the free plan they do not reach
