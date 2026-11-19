@@ -32,8 +32,14 @@ deploy:
 
 Push to `main`. `platform`'s **Sync registry** runs every hour, and sooner when the Hub's webhook
 sees the push and dispatches it; it validates the manifest, writes `projects/<slug>.yml` and merges
-it. The project is on the Hub within the hour, and from then on its name, summary, tags, status,
-pinned and listed can also be edited on the Hub, which commits them back into `.graphite.yml`.
+it. The project is on the Hub within the hour, with the name, summary, tags, status, pinned, listed,
+showcase, owner and authors the manifest gave it.
+
+That first sync is the only time the Hub takes those fields from the manifest. From then on they
+are edited on the Hub, which keeps them in its own database and never writes to the repository;
+changing them in `.graphite.yml` afterwards does not change the site. `deploy`, `parent`, `kind`,
+`paths` and `releases` stay in `.graphite.yml`, and the Hub follows them on every sync. The
+[registry reference](reference/registry.md) lists which field belongs to which group.
 
 ## 4. Publish images
 
