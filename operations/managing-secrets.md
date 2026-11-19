@@ -35,7 +35,7 @@ and changes nothing on the VPS.
 | Cloudflare API token | `CLOUDFLARE_API_TOKEN` in `platform` (`production`); Zone → DNS → Edit on `project-graphite.com` and Account → Cloudflare Pages → Edit |
 | certificate DNS token | `/edge/CF_DNS_API_TOKEN` in the store, or the `secrets.env` the bootstrap wrote under `/srv/graphite/edge/` when `/etc/graphite/edge.env` does not exist |
 | the Hub's GitHub OAuth App, webhook secret and SMTP | `/graphite-hub/`; see the Hub's README for the names |
-| platform GitHub App | organisation secrets `PLATFORM_APP_CLIENT_ID` and `PLATFORM_APP_PRIVATE_KEY`, plus `/graphite-hub/` for write-back and `console.env` for releases from the console; see [rotating-the-deploy-app.md](rotating-the-deploy-app.md) |
+| platform GitHub App | organisation secrets `PLATFORM_APP_CLIENT_ID` and `PLATFORM_APP_PRIVATE_KEY`, plus `/graphite-hub/` for the Hub's reads and its dispatch of the registry sync, and `console.env` for releases from the console; see [rotating-the-deploy-app.md](rotating-the-deploy-app.md) |
 
 `platform`'s `production` environment only runs from `main`, so a pull request branch cannot read
 it. **Deploy** also reads the `platform` variables `DEPLOY_URL`
